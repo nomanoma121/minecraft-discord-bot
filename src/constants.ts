@@ -1,6 +1,7 @@
 export const DIFFICULTY = {
+  PEACEFUL: 'peaceful',
   EASY: 'easy',
-  MEDIUM: 'medium',
+  NORMAL: 'normal',
   HARD: 'hard',
 } as const;
 

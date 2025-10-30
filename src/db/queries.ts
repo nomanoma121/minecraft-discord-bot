@@ -1,6 +1,7 @@
 import type { Server, ServerConfig } from "../types/type";
 import { db } from "../lib/db";
 import { servers } from "./schema";
+import { count, eq } from "drizzle-orm";
 
 export const queries = {
   createServer: async (ownerId: string, config: ServerConfig): Promise<Server> => {
@@ -24,4 +25,12 @@ export const queries = {
     }
     return server;
   },
+  isServerNameAvailable: async (name: string): Promise<boolean> => {
+    const result = await db.select().from(servers).where(eq(servers.name, name)).limit(1);
+    return result.length === 0;
+  },
+  getCurrentServerCount: async (): Promise<number> => {
+    const result = await db.select({ count: count() }).from(servers);
+    return result[0]?.count ?? 0;
+  }
 }

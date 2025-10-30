@@ -25,6 +25,9 @@ export const queries = {
     }
     return server;
   },
+  getAllServers: async (): Promise<Server[]> => {
+    return await db.select().from(servers);
+  },
   isServerNameAvailable: async (name: string): Promise<boolean> => {
     const result = await db.select().from(servers).where(eq(servers.name, name)).limit(1);
     return result.length === 0;

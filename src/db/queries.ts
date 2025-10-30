@@ -32,5 +32,9 @@ export const queries = {
   getCurrentServerCount: async (): Promise<number> => {
     const result = await db.select({ count: count() }).from(servers);
     return result[0]?.count ?? 0;
-  }
+  },
+  getServerByName: async (name: string): Promise<Server | null> => {
+    const [server] = await db.select().from(servers).where(eq(servers.name, name)).limit(1);
+    return server || null;
+  },
 }

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { queries as q } from "../db/queries";
@@ -23,14 +23,14 @@ export const start = {
     try {
       const server = await q.getServerByName(serverName);
       if (!server) {
-        await interaction.editReply(`❌ Server "${serverName}" not found. Use /create to create a new server.`);
+        await interaction.editReply({ embeds: [createErrorEmbed(`No server found with the name "${serverName}".`)] });
         return;
       }
 
       const runningContainers = await docker.listContainers({ all: false });
       if (runningContainers.length > 0) {
         const runningNames = runningContainers.map(c => c.Names?.[0]?.replace(/^\//, '')).join(', ');
-        await interaction.editReply(`L Another server is already running: ${runningNames}\nPlease stop it first with /stop`);
+        await interaction.editReply({ embeds: [createErrorEmbed(`Cannot start server "${serverName}" because the following servers are already running: ${runningNames}. Please stop them first.`)] });
         return;
       }
 
@@ -54,13 +54,25 @@ export const start = {
 
       await interaction.editReply(
         `✅ Check server "${serverName}"\n` +
-        `✅ Start Minecraft Server\n\n` +
-        `Server Name: ${server.name}\n` +
-        `Version: ${server.version}\n` +
-        `Gamemode: ${server.gamemode}\n` +
-        `Difficulty: ${server.difficulty}\n` +
-        `Port: 25565`
+        `✅ Start Minecraft Server\n\n`
       );
+
+      const embed = new EmbedBuilder()
+        .setTitle(`Minecraft Server "${serverName}" Started`)
+        .setColor(0x00FF00)
+        .setDescription(`The Minecraft server "${serverName}" has been started successfully.`)
+        .addFields(
+          { name: "Server Name", value: server.name, inline: true },
+          { name: "Version", value: server.version, inline: true },
+          { name: "Gamemode", value: server.gamemode, inline: true },
+          { name: "Difficulty", value: server.difficulty, inline: true },
+          { name: "Max Players", value: server.maxPlayers.toString(), inline: true },
+          { name: "Description", value: server.description || "N/A", inline: false },
+          { name: "Owner", value: `<@${server.ownerId}>`, inline: true },
+        )
+        .setFooter({ text: "Enjoy your game!" });
+
+      await interaction.followUp({ embeds: [embed] });
 
     } catch (error) {
       console.error("Error starting the Minecraft server:", error);

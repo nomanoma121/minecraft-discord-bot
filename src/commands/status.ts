@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { queries as q } from "../db/queries";
@@ -18,7 +18,7 @@ export const status = {
   async execute(interaction: ChatInputCommandInteraction) {
     const serverName = interaction.options.getString("server-name")!;
 
-    await interaction.deferReply();
+    await interaction.reply(`⌛ Fetching status for server "${serverName}"...`);
 
     try {
       const server = await q.getServerByName(serverName);
@@ -33,44 +33,24 @@ export const status = {
       try {
         containerInfo = await container.inspect();
       } catch (error) {
-        await interaction.editReply(
-          `**Server: ${server.name}**\n` +
-          `Status: ⚪ Container Not Found\n\n` +
-          `**Configuration:**\n` +
-          `Version: ${server.version}\n` +
-          `Gamemode: ${server.gamemode}\n` +
-          `Difficulty: ${server.difficulty}\n` +
-          `Type: ${server.type}\n` +
-          `Max Players: ${server.maxPlayers}\n` +
-          `Description: ${server.description || 'N/A'}\n` +
-          `Owner: <@${server.ownerId}>`
-        );
+        await interaction.editReply({ embeds: [createErrorEmbed(`Server "${serverName}" not found. The server may be deleted.`)] });
         return;
       }
       const isRunning = containerInfo.State.Running;
-      const statusEmoji = isRunning ? "🟢" : "⚪";
       const statusText = isRunning ? "Running" : "Stopped";
 
-      let message = `**Server: ${server.name}**\n`;
-      message += `Status: ${statusEmoji} ${statusText}\n\n`;
+      const embed = new EmbedBuilder()
+        .setTitle(`Status of Minecraft Server: ${serverName}`)
+        .setColor(isRunning ? 0x00FF00 : 0xFF0000)
+        .addFields(
+          { name: "Status", value: statusText, inline: true },
+          { name: "Version", value: server.version, inline: true },
+          { name: "Gamemode", value: server.gamemode, inline: true },
+          { name: "Difficulty", value: server.difficulty, inline: true },
+          { name: "Owner", value: `<@${server.ownerId}>`, inline: true }
+        );
 
-      message += `**Configuration:**\n`;
-      message += `Version: ${server.version}\n`;
-      message += `Gamemode: ${server.gamemode}\n`;
-      message += `Difficulty: ${server.difficulty}\n`;
-      message += `Type: ${server.type}\n`;
-      message += `Max Players: ${server.maxPlayers}\n`;
-      message += `Description: ${server.description || 'N/A'}\n`;
-      message += `Owner: <@${server.ownerId}>\n\n`;
-
-      if (isRunning) {
-        message += `**Runtime Info:**\n`;
-        message += `Started: ${new Date(containerInfo.State.StartedAt).toLocaleString()}\n`;
-        message += `Port: 25565\n`;
-      }
-      
-      await interaction.editReply(message);
-
+      await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       console.error("Error checking server status:", error);
       await interaction.editReply({ embeds: [createErrorEmbed("An error occurred while fetching the server status. Please try again later.")] });

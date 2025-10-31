@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { queries as q } from "../db/queries";
@@ -31,10 +31,9 @@ export const list = {
 
       for (const server of servers) {
         const isRunning = runningNames.has(server.name);
-        const statusEmoji = isRunning ? "🟢" : "⚪";
         const statusText = isRunning ? "Running" : "Stopped";
 
-        message += `${statusEmoji} **${server.name}** - ${statusText}\n`;
+        message += `- **${server.name}** - ${statusText}\n`;
         message += `   Version: ${server.version} | Gamemode: ${server.gamemode} | Difficulty: ${server.difficulty}\n`;
         if (server.description) {
           message += `   Description: ${server.description}\n`;

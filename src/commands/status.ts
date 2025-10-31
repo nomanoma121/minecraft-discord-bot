@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { docker } from "../lib/docker";
+import { createErrorEmbed } from "../lib/embed";
 import { queries as q } from "../db/queries";
 
 export const status = {
@@ -22,7 +23,7 @@ export const status = {
     try {
       const server = await q.getServerByName(serverName);
       if (!server) {
-        await interaction.editReply(`❌ Server "${serverName}" not found.`);
+        await interaction.editReply({ embeds: [createErrorEmbed(`No server found with the name "${serverName}".`)] });
         return;
       }
 
@@ -72,7 +73,7 @@ export const status = {
 
     } catch (error) {
       console.error("Error checking server status:", error);
-      await interaction.editReply("❌ Failed to check server status.");
+      await interaction.editReply({ embeds: [createErrorEmbed("An error occurred while fetching the server status. Please try again later.")] });
     }
   },
 };

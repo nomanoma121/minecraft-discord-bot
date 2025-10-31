@@ -1,9 +1,10 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { GAMEMODE, DIFFICULTY, SERVER_TYPE } from "../constants";
 import { docker } from "../lib/docker";
 import { Config } from "../config"
 import { queries as q } from "../db/queries";
 import type { Difficulty, Gamemode, ServerConfig, ServerType } from "../types/type";
+import { createErrorEmbed } from "../lib/embed";
 
 export const create = {
   name: "create",
@@ -81,12 +82,12 @@ export const create = {
 
     const existingServerCount = await q.getCurrentServerCount();
     if (existingServerCount >= Config.maxServerCount) {
-      await interaction.editReply(`❌ You have reached the maximum number of servers (${Config.maxServerCount}). Please delete an existing server or change bot config settings before creating a new one.`);
+      await interaction.editReply({ embeds: [createErrorEmbed("The maximum number of servers has been reached. Please try again later.")] });
       return;
     }
     const isNameAvailable = await q.isServerNameAvailable(serverConfig.name);
     if (!isNameAvailable) {
-      await interaction.editReply(`❌ The server name "${serverConfig.name}" is already taken. Please choose a different name.`);
+      await interaction.editReply({ embeds: [createErrorEmbed(`The server name "${serverConfig.name}" is already taken. Please choose a different name.`)] });
       return;
     }
 
@@ -126,17 +127,25 @@ export const create = {
 
       console.log("Minecraft server record created in the database:", server);
 
-      await interaction.editReply("✅ Minecraft server created successfully!\n" +
-        `Server Name: ${server.name}\n` +
-        `Version: ${server.version}\n` +
-        `Gamemode: ${server.gamemode}\n` +
-        `Difficulty: ${server.difficulty}\n` +
-        `Description: ${server.description}\n`
-      );
+      const embed = new EmbedBuilder()
+        .setTitle("Created Server Information")
+        .setColor(0x00FF00)
+        .addFields(
+          { name: "Server Name", value: server.name, inline: true },
+          { name: "Version", value: server.version, inline: true },
+          { name: "Gamemode", value: server.gamemode, inline: true },
+          { name: "Difficulty", value: server.difficulty, inline: true },
+          { name: "Max Players", value: server.maxPlayers.toString(), inline: true },
+          { name: "Description", value: server.description || "N/A", inline: false },
+          { name: "Owner", value: `<@${server.ownerId}>`, inline: true },
+        )
+        .setFooter({ text: "Use /start to start your server." });
+      await interaction.editReply("✅ Minecraft server created successfully!");
+      await interaction.editReply({ embeds: [embed] });
 
     } catch (error) {
       console.error("Error starting the Minecraft server:", error);
-      await interaction.editReply("❌ Failed to start the Minecraft server.");
+      await interaction.editReply({ embeds: [createErrorEmbed("An error occurred while creating the Minecraft server. Please try again later.")] });
     }
   },
 };

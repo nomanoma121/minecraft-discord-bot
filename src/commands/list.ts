@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { docker } from "../lib/docker";
+import { createErrorEmbed } from "../lib/embed";
 import { queries as q } from "../db/queries";
 
 export const list = {
@@ -45,7 +46,7 @@ export const list = {
 
     } catch (error) {
       console.error("Error listing servers:", error);
-      await interaction.editReply("❌ Failed to fetch server list.");
+      await interaction.editReply({ embeds: [createErrorEmbed("Failed to fetch server list. Please try again later.")] });
     }
   },
 };

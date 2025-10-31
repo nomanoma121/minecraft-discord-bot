@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { docker } from "../lib/docker";
+import { createErrorEmbed } from "../lib/embed";
 import { queries as q } from "../db/queries";
 
 export const start = {
@@ -43,7 +44,8 @@ export const start = {
       try {
         await container.inspect();
       } catch (error) {
-        await interaction.editReply(`❌ Container "${serverName}" not found. The server may have been deleted.`);
+        // TODO: Database cleanup if container is missing
+        await interaction.editReply({ embeds: [createErrorEmbed(`Server "${serverName}" not found. The server may have been deleted.`)] });
         return;
       }
 
@@ -62,7 +64,7 @@ export const start = {
 
     } catch (error) {
       console.error("Error starting the Minecraft server:", error);
-      await interaction.editReply("❌ Failed to start the Minecraft server.");
+      await interaction.editReply({ embeds: [createErrorEmbed("An error occurred while starting the Minecraft server. Please try again later.")] });
     }
   },
 };

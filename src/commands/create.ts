@@ -8,12 +8,7 @@ import { DIFFICULTY, GAMEMODE, SERVER_TYPE } from "../constants";
 import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import type {
-	Difficulty,
-	Gamemode,
-	ServerConfig,
-	ServerType,
-} from "../types/type";
+import type { Difficulty, Gamemode, ServerType } from "../types/type";
 
 export const create = {
 	name: "create",
@@ -83,8 +78,16 @@ export const create = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.reply("⏳ Creating Minecraft Server...");
 
+		const serverName = interaction.options.getString("server-name");
+		if (!serverName) {
+			await interaction.editReply({
+				embeds: [createErrorEmbed("Server name is required.")],
+			});
+			return;
+		}
+
 		const serverConfig = {
-			name: interaction.options.getString("server-name")!,
+			name: serverName,
 			version: interaction.options.getString("version") ?? "latest",
 			maxPlayers: 20,
 			difficulty: (interaction.options.getString("difficulty") ??
@@ -146,11 +149,11 @@ export const create = {
 				],
 				HostConfig: {
 					PortBindings: {
-						[Config.port + "/tcp"]: [{ HostPort: Config.port.toString() }],
+						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],
 					},
 				},
 				ExposedPorts: {
-					[Config.port + "/tcp"]: {},
+					[`${Config.port}/tcp`]: {},
 				},
 			});
 			console.log("Minecraft server container created.");

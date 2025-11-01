@@ -20,7 +20,13 @@ export const start = {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		const serverName = interaction.options.getString("server-name")!;
+		const serverName = interaction.options.getString("server-name");
+		if (!serverName) {
+			await interaction.reply({
+				embeds: [createErrorEmbed("Server name is required.")],
+			});
+			return;
+		}
 
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
@@ -51,14 +57,14 @@ export const start = {
 			}
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n` + `⌛ Starting Minecraft Server...`,
+				`✅ Check server "${serverName}"\n⌛ Starting Minecraft Server...`,
 			);
 
 			const container = docker.getContainer(server.id);
 
 			try {
 				await container.inspect();
-			} catch (error) {
+			} catch (_error) {
 				// TODO: Database cleanup if container is missing
 				await interaction.editReply({
 					embeds: [
@@ -74,7 +80,7 @@ export const start = {
 			console.log(`Minecraft server "${serverName}" started.`);
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n` + `✅ Start Minecraft Server\n\n`,
+				`✅ Check server "${serverName}"\n✅ Start Minecraft Server\n\n`,
 			);
 
 			const embed = new EmbedBuilder()

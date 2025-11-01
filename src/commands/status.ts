@@ -21,7 +21,13 @@ export const status = {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		const serverName = interaction.options.getString("server-name")!;
+		const serverName = interaction.options.getString("server-name");
+		if (!serverName) {
+			await interaction.reply({
+				embeds: [createErrorEmbed("Server name is required.")],
+			});
+			return;
+		}
 
 		await interaction.reply(`⌛ Fetching status for server "${serverName}"...`);
 
@@ -49,6 +55,7 @@ export const status = {
 						),
 					],
 				});
+				console.error("Error inspecting container:", error);
 				return;
 			}
 			const isRunning = containerInfo.State.Running;

@@ -20,7 +20,13 @@ const deleteCommand = {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		const serverName = interaction.options.getString("server-name")!;
+		const serverName = interaction.options.getString("server-name");
+		if (!serverName) {
+			await interaction.reply({
+				embeds: [createErrorEmbed("Server name is required.")],
+			});
+			return;
+		}
 
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
@@ -47,7 +53,7 @@ const deleteCommand = {
 			}
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n` + `⌛ Removing server...`,
+				`✅ Check server "${serverName}"\n⌛ Removing server...`,
 			);
 
 			const container = docker.getContainer(server.id);
@@ -62,7 +68,7 @@ const deleteCommand = {
 
 				await container.remove();
 				console.log(`Removed Docker container "${serverName}".`);
-			} catch (error) {
+			} catch (_error) {
 				console.log(
 					`Container "${serverName}" not found, continuing with database cleanup.`,
 				);
@@ -72,7 +78,7 @@ const deleteCommand = {
 			console.log(`Deleted server "${serverName}" from database.`);
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n` + `✅ Remove server\n\n`,
+				`✅ Check server "${serverName}"\n✅ Remove server\n\n`,
 			);
 
 			const embed = new EmbedBuilder()

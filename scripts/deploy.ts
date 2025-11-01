@@ -3,6 +3,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { REST, Routes } from "discord.js";
 
+const discordToken = process.env.DISCORD_TOKEN;
+const clientId = process.env.CLIENT_ID;
+const guildId = process.env.GUILD_ID;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -26,7 +30,13 @@ for (const file of commandFiles) {
 	}
 }
 
-const rest = new REST().setToken(process.env.DISCORD_TOKEN!);
+if (!discordToken || !clientId || !guildId) {
+	throw new Error(
+		"Missing environment variables: DISCORD_TOKEN, CLIENT_ID, or GUILD_ID",
+	);
+}
+
+const rest = new REST().setToken(discordToken);
 
 try {
 	console.log(
@@ -34,10 +44,7 @@ try {
 	);
 
 	const data = await rest.put(
-		Routes.applicationGuildCommands(
-			process.env.CLIENT_ID!,
-			process.env.GUILD_ID!,
-		),
+		Routes.applicationGuildCommands(clientId, guildId),
 		{ body: commands },
 	);
 

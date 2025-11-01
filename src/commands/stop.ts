@@ -21,7 +21,13 @@ export const stop = {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		const serverName = interaction.options.getString("server-name")!;
+		const serverName = interaction.options.getString("server-name");
+		if (!serverName) {
+			await interaction.reply({
+				embeds: [createErrorEmbed("Server name is required.")],
+			});
+			return;
+		}
 
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
@@ -64,14 +70,14 @@ export const stop = {
 			}
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n` + `⌛ Stopping Minecraft Server...`,
+				`✅ Check server "${serverName}"\n⌛ Stopping Minecraft Server...`,
 			);
 
 			await container.stop();
 			console.log(`Minecraft server "${serverName}" stopped.`);
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n` + `✅ Stop Minecraft Server\n\n`,
+				`✅ Check server "${serverName}"\n✅ Stop Minecraft Server\n\n`,
 			);
 
 			const embed = new EmbedBuilder()

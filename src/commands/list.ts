@@ -1,6 +1,5 @@
 import {
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
 import { queries as q } from "../db/queries";

@@ -70,8 +70,16 @@ const deleteCommand = {
 				console.log(`Removed Docker container "${serverName}".`);
 			} catch (_error) {
 				console.log(
-					`Container "${serverName}" not found, continuing with database cleanup.`,
+					`Container "${serverName}" not found, continuing with cleanup.`,
 				);
+			}
+
+			try {
+				const volume = docker.getVolume(server.id);
+				await volume.remove();
+				console.log(`Removed volume "${server.id}".`);
+			} catch (_error) {
+				console.log(`Volume "${server.id}" not found, continuing with cleanup.`);
 			}
 
 			await q.deleteServer(serverName);
@@ -94,7 +102,7 @@ const deleteCommand = {
 				)
 				.setFooter({ text: "All data for this server has been removed." });
 
-			await interaction.followUp({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
 			console.error("Error deleting the Minecraft server:", error);
 			await interaction.editReply({

@@ -135,6 +135,10 @@ export const create = {
 
 			console.log("Minecraft server record created in the database:", server);
 
+			await docker.createVolume({
+				Name: server.id,
+			});
+
 			await docker.createContainer({
 				name: server.id,
 				Image: "itzg/minecraft-server",
@@ -142,7 +146,7 @@ export const create = {
 					"EULA=TRUE",
 					`SERVER_NAME=${serverConfig.name}`,
 					`MOTD=${serverConfig.description}`,
-					`MINECRAFT_VERSION=${serverConfig.version}`,
+					`VERSION=${serverConfig.version}`,
 					`GAMEMODE=${serverConfig.gamemode}`,
 					`DIFFICULTY=${serverConfig.difficulty}`,
 					`TYPE=${serverConfig.type}`,
@@ -151,6 +155,7 @@ export const create = {
 					PortBindings: {
 						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],
 					},
+					Binds: [`${server.id}:/data`],
 				},
 				ExposedPorts: {
 					[`${Config.port}/tcp`]: {},

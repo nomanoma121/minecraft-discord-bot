@@ -3,9 +3,13 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
+import { HEALTH_STATUS } from "../constants";
 import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+
+const HEALTH_INTERVAL = 5000;
+const HEALTH_TIMEOUT = 300000;
 
 export const start = {
 	name: "start",
@@ -77,10 +81,45 @@ export const start = {
 			}
 
 			await container.start();
-			console.log(`Minecraft server "${serverName}" started.`);
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n✅ Start Minecraft Server\n\n`,
+				`✅ Check server "${serverName}"\n✅ Start container\n⌛ Waiting for Minecraft server to be ready...`,
+			);
+
+			const startTime = Date.now();
+			let isHealthy = false;
+
+			while (Date.now() - startTime < HEALTH_TIMEOUT) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, HEALTH_INTERVAL),
+				);
+
+				const info = await container.inspect();
+				const healthStatus = info.State.Health?.Status;
+
+				if (healthStatus === HEALTH_STATUS.HEALTHY) {
+					isHealthy = true;
+					break;
+				}
+
+				if (healthStatus === HEALTH_STATUS.UNHEALTHY) {
+					break;
+				}
+			}
+
+			if (!isHealthy) {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							`Server "${serverName}" failed to start. Please check logs.`,
+						),
+					],
+				});
+				return;
+			}
+
+			await interaction.editReply(
+				`✅ Check server "${serverName}"\n✅ Start server\n✅ Minecraft server ready\n\n`,
 			);
 
 			const embed = new EmbedBuilder()
@@ -108,7 +147,7 @@ export const start = {
 				)
 				.setFooter({ text: "Enjoy your game!" });
 
-			await interaction.followUp({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);
 			await interaction.editReply({

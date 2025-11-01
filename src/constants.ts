@@ -14,5 +14,10 @@ export const GAMEMODE = {
 
 // Currently, only Paper is supported
 export const SERVER_TYPE = {
-	PAPER: "paper",
+	PAPER: "PAPER",
+} as const;
+
+export const HEALTH_STATUS = {
+	HEALTHY: "healthy",
+	UNHEALTHY: "unhealthy",
 } as const;

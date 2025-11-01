@@ -93,7 +93,7 @@ export const stop = {
 				)
 				.setFooter({ text: "Use /start to start your server again." });
 
-			await interaction.followUp({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
 			console.error("Error stopping the Minecraft server:", error);
 			await interaction.editReply({

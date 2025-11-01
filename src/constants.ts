@@ -1,18 +1,18 @@
 export const DIFFICULTY = {
-  PEACEFUL: 'peaceful',
-  EASY: 'easy',
-  NORMAL: 'normal',
-  HARD: 'hard',
+	PEACEFUL: "peaceful",
+	EASY: "easy",
+	NORMAL: "normal",
+	HARD: "hard",
 } as const;
 
 export const GAMEMODE = {
-  SURVIVAL: 'survival',
-  CREATIVE: 'creative',
-  ADVENTURE: 'adventure',
-  SPECTATOR: 'spectator',
+	SURVIVAL: "survival",
+	CREATIVE: "creative",
+	ADVENTURE: "adventure",
+	SPECTATOR: "spectator",
 } as const;
 
 // Currently, only Paper is supported
 export const SERVER_TYPE = {
-  PAPER: 'paper',
+	PAPER: "paper",
 } as const;

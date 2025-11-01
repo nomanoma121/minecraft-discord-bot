@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import type { Difficulty, Gamemode, ServerType } from "../types/type";
 
 export const servers = sqliteTable("servers", {
-  id: int("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey().notNull(),
   name: text("name").unique().notNull(),
   ownerId: text("owner_id").notNull(),
   version: text("version").notNull(),

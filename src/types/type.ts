@@ -15,7 +15,7 @@ export type ServerConfig = {
 }
 
 export type Server = {
-  id: number;
+  id: string;
   ownerId: string;
   createdAt: string;
   updatedAt: string;

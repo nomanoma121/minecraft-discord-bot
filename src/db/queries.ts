@@ -2,12 +2,15 @@ import type { Server, ServerConfig } from "../types/type";
 import { db } from "../lib/db";
 import { servers } from "./schema";
 import { count, eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
 export const queries = {
   createServer: async (ownerId: string, config: ServerConfig): Promise<Server> => {
+    const id = randomUUID();
     const [server] = await db
       .insert(servers)
       .values({
+        id: id,
         name: config.name,
         ownerId: ownerId,
         version: config.version,

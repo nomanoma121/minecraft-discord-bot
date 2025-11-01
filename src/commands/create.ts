@@ -92,8 +92,20 @@ export const create = {
     }
 
     try {
+      const server = await q.createServer(interaction.user.id, {
+        name: serverConfig.name,
+        version: serverConfig.version,
+        maxPlayers: serverConfig.maxPlayers,
+        difficulty: serverConfig.difficulty,
+        type: serverConfig.type,
+        gamemode: serverConfig.gamemode,
+        description: serverConfig.description,
+      });
+
+      console.log("Minecraft server record created in the database:", server);
+
       await docker.createContainer({
-        name: interaction.options.getString("server-name")!,
+        name: server.id,
         Image: "itzg/minecraft-server",
         Env: [
           "EULA=TRUE",
@@ -114,18 +126,6 @@ export const create = {
         },
       });
       console.log("Minecraft server container created.");
-
-      const server = await q.createServer(interaction.user.id, {
-        name: serverConfig.name,
-        version: serverConfig.version,
-        maxPlayers: serverConfig.maxPlayers,
-        difficulty: serverConfig.difficulty,
-        type: serverConfig.type,
-        gamemode: serverConfig.gamemode,
-        description: serverConfig.description,
-      });
-
-      console.log("Minecraft server record created in the database:", server);
 
       const embed = new EmbedBuilder()
         .setTitle("Created Server Information")

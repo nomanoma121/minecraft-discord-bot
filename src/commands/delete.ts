@@ -37,7 +37,7 @@ const deleteCommand = {
         `⌛ Removing server...`
       );
 
-      const container = docker.getContainer(serverName);
+      const container = docker.getContainer(server.id);
 
       try {
         const containerInfo = await container.inspect();

@@ -39,7 +39,7 @@ export const start = {
         `⌛ Starting Minecraft Server...`
       );
 
-      const container = docker.getContainer(serverName);
+      const container = docker.getContainer(server.id);
 
       try {
         await container.inspect();

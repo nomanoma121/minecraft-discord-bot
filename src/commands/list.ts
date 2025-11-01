@@ -21,7 +21,7 @@ export const list = {
       }
 
       const runningContainers = await docker.listContainers({ all: false });
-      const runningNames = new Set(
+      const runningIds = new Set(
         runningContainers
           .map(c => c.Names?.[0]?.replace(/^\//, ''))
           .filter((name): name is string => name !== undefined)
@@ -30,7 +30,7 @@ export const list = {
       let message = `**Minecraft Servers (${servers.length}/${10}):**\n\n`;
 
       for (const server of servers) {
-        const isRunning = runningNames.has(server.name);
+        const isRunning = runningIds.has(server.id);
         const statusText = isRunning ? "Running" : "Stopped";
 
         message += `- **${server.name}** - ${statusText}\n`;

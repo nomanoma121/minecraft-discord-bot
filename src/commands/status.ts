@@ -27,7 +27,7 @@ export const status = {
         return;
       }
 
-      const container = docker.getContainer(serverName);
+      const container = docker.getContainer(server.id);
       let containerInfo;
 
       try {

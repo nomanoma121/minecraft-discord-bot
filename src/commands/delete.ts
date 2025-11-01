@@ -79,7 +79,9 @@ const deleteCommand = {
 				await volume.remove();
 				console.log(`Removed volume "${server.id}".`);
 			} catch (_error) {
-				console.log(`Volume "${server.id}" not found, continuing with cleanup.`);
+				console.log(
+					`Volume "${server.id}" not found, continuing with cleanup.`,
+				);
 			}
 
 			await q.deleteServer(serverName);

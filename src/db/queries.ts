@@ -54,6 +54,14 @@ export const queries = {
 			.limit(1);
 		return server || null;
 	},
+	getServerById: async (id: string): Promise<Server | null> => {
+		const [server] = await db
+			.select()
+			.from(servers)
+			.where(eq(servers.id, id))
+			.limit(1);
+		return server || null;
+	},
 	deleteServer: async (name: string): Promise<void> => {
 		await db.delete(servers).where(eq(servers.name, name));
 	},

@@ -47,13 +47,23 @@ export const start = {
 
 			const runningContainers = await docker.listContainers({ all: false });
 			if (runningContainers.length > 0) {
-				const runningNames = runningContainers
-					.map((c) => c.Names?.[0]?.replace(/^\//, ""))
-					.join(", ");
+				const serverId = runningContainers[0]?.Names?.[0]?.replace("/", "");
+				if (!serverId) {
+					await interaction.editReply({
+						embeds: [
+							createErrorEmbed(
+								"An unexpected error occurred. Please try again later.",
+							),
+						],
+					});
+					return;
+				}
+
+				const serverName = await q.getServerById(serverId);
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Cannot start server "${serverName}" because the following servers are already running: ${runningNames}. Please stop them first.`,
+							`Another server "${serverName?.name}" is already running. Please stop it before starting a new one.`,
 						),
 					],
 				});
@@ -90,9 +100,7 @@ export const start = {
 			let isHealthy = false;
 
 			while (Date.now() - startTime < HEALTH_TIMEOUT) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, HEALTH_INTERVAL),
-				);
+				await new Promise((resolve) => setTimeout(resolve, HEALTH_INTERVAL));
 
 				const info = await container.inspect();
 				const healthStatus = info.State.Health?.Status;

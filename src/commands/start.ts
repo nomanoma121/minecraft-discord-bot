@@ -3,7 +3,7 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { HEALTH_STATUS } from "../constants";
+import { EMBED_COLORS, HEALTH_STATUS } from "../constants";
 import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
@@ -119,7 +119,9 @@ export const start = {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Server "${serverName}" failed to start. Please check logs.`,
+							`Server "${serverName}" failed to start. Please try again later.
+							(If you are using "latest" as the version, specifying a direct version may help resolve the issue.)
+							`,
 						),
 					],
 				});
@@ -132,7 +134,7 @@ export const start = {
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Minecraft Server "${serverName}" Started`)
-				.setColor(0x00ff00)
+				.setColor(EMBED_COLORS.SUCCESS)
 				.setDescription(
 					`The Minecraft server "${serverName}" has been started successfully.`,
 				)

@@ -4,7 +4,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { DIFFICULTY, GAMEMODE, SERVER_TYPE } from "../constants";
+import { DIFFICULTY, EMBED_COLORS, GAMEMODE, SERVER_TYPE } from "../constants";
 import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
@@ -165,7 +165,7 @@ export const create = {
 
 			const embed = new EmbedBuilder()
 				.setTitle("Created Server Information")
-				.setColor(0x00ff00)
+				.setColor(EMBED_COLORS.SUCCESS)
 				.addFields(
 					{ name: "Server Name", value: server.name, inline: true },
 					{ name: "Version", value: server.version, inline: true },

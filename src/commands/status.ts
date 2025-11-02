@@ -4,6 +4,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import type Dockerode from "dockerode";
+import { EMBED_COLORS } from "../constants";
 import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
@@ -63,7 +64,7 @@ export const status = {
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Status of Minecraft Server: ${serverName}`)
-				.setColor(isRunning ? 0x00ff00 : 0xff0000)
+				.setColor(isRunning ? EMBED_COLORS.SUCCESS : EMBED_COLORS.ERROR)
 				.addFields(
 					{ name: "Status", value: statusText, inline: true },
 					{ name: "Version", value: server.version, inline: true },

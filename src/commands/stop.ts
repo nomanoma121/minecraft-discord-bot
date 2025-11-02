@@ -4,6 +4,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import type Dockerode from "dockerode";
+import { EMBED_COLORS } from "../constants";
 import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
@@ -82,7 +83,7 @@ export const stop = {
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Minecraft Server "${serverName}" Stopped`)
-				.setColor(0xff0000)
+				.setColor(EMBED_COLORS.SUCCESS)
 				.setDescription(
 					`The Minecraft server "${serverName}" has been stopped successfully.`,
 				)

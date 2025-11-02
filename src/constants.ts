@@ -21,3 +21,9 @@ export const HEALTH_STATUS = {
 	HEALTHY: "healthy",
 	UNHEALTHY: "unhealthy",
 } as const;
+
+export const EMBED_COLORS = {
+	SUCCESS: 0x00ff00,
+	ERROR: 0xff0000,
+	INFO: 0x0099ff,
+} as const;

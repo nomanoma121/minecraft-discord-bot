@@ -3,6 +3,7 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
+import { EMBED_COLORS } from "../constants";
 
 export const help = {
 	name: "help",
@@ -13,7 +14,7 @@ export const help = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		const embed = new EmbedBuilder()
 			.setTitle("Minecraft Discord Bot - Commands")
-			.setColor(0x0099ff)
+			.setColor(EMBED_COLORS.INFO)
 			.setDescription(
 				"Here are all the available commands for managing Minecraft servers:",
 			)

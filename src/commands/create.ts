@@ -23,6 +23,12 @@ export const create = {
 		)
 		.addStringOption((option) =>
 			option
+				.setName("version")
+				.setDescription("Minecraft version to use")
+				.setRequired(true),
+		)
+		.addStringOption((option) =>
+			option
 				.setName("description")
 				.setDescription("Description of the Minecraft server.")
 				.setRequired(false),
@@ -39,12 +45,6 @@ export const create = {
 					{ name: "adventure", value: GAMEMODE.ADVENTURE },
 					{ name: "spectator", value: GAMEMODE.SPECTATOR },
 				)
-				.setRequired(false),
-		)
-		.addStringOption((option) =>
-			option
-				.setName("version")
-				.setDescription("Minecraft version to use (default: latest)")
 				.setRequired(false),
 		)
 		.addStringOption((option) =>
@@ -86,9 +86,17 @@ export const create = {
 			return;
 		}
 
+		const version = interaction.options.getString("version");
+		if (!version) {
+			await interaction.editReply({
+				embeds: [createErrorEmbed("Minecraft version is required.")],
+			});
+			return;
+		}
+
 		const serverConfig = {
 			name: serverName,
-			version: interaction.options.getString("version") ?? "latest",
+			version: version,
 			maxPlayers: 20,
 			difficulty: (interaction.options.getString("difficulty") ??
 				DIFFICULTY.NORMAL) as Difficulty,

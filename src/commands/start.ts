@@ -119,9 +119,7 @@ export const start = {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Server "${serverName}" failed to start. Please try again later.
-							(If you are using "latest" as the version, specifying a direct version may help resolve the issue.)
-							`,
+							`Server "${serverName}" failed to start. Please try again later.`,
 						),
 					],
 				});

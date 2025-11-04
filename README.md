@@ -4,10 +4,10 @@ A Discord bot for managing Minecraft servers directly from Discord.
 
 ## Features
 
-- Create and delete Minecraft servers
-- Start and stop servers
-- Check server status
-- List all servers
+- 🎮 Create and delete Minecraft servers
+- 🚀 Start and stop servers
+- 📊 Check server status
+- 📝 List all servers
 
 ## Tech Stack
 
@@ -21,27 +21,21 @@ A Discord bot for managing Minecraft servers directly from Discord.
 
 ### Prerequisites
 
-- Bun
 - Docker
+- Docker Compose
 
 ### Setup
 
 ```bash
-# Install dependencies
-bun install
-
 # Set up environment variables
 cp .env.example .env
-# Edit .env with your tokens and configuration
+# Edit .env with your Discord tokens
 
-# Initialize database
-bun run db:push
+# Build and start
+docker-compose up -d --build
 
-# Deploy Discord commands
-bun run cmd:deploy
-
-# Start the bot
-bun run dev
+# View logs
+docker-compose logs -f bot
 ```
 
 ### Environment Variables
@@ -50,7 +44,6 @@ bun run dev
 DISCORD_TOKEN=your_discord_token_here
 CLIENT_ID=your_client_id
 GUILD_ID=your_guild_id
-DB_FILE_NAME=database.db
 ```
 
 ## Commands

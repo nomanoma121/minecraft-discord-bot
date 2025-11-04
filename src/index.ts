@@ -14,7 +14,6 @@ import { db } from "./lib/db";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Run database migrations (idempotent - safe to run multiple times)
 migrate(db, { migrationsFolder: "./drizzle" });
 
 const client = new Client({

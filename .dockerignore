@@ -1,0 +1,8 @@
+node_modules
+.git
+.github
+.env
+database.db
+*.log
+tmp.*
+.claude

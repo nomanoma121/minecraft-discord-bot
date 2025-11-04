@@ -65,4 +65,18 @@ export const queries = {
 	deleteServer: async (name: string): Promise<void> => {
 		await db.delete(servers).where(eq(servers.name, name));
 	},
+	updateServer: async (
+		name: string,
+		updates: Partial<Omit<Server, "id" | "name" | "ownerId" | "createdAt">>,
+	): Promise<Server | null> => {
+		const [updated] = await db
+			.update(servers)
+			.set({
+				...updates,
+				updatedAt: new Date().toISOString(),
+			})
+			.where(eq(servers.name, name))
+			.returning();
+		return updated || null;
+	},
 };

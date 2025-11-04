@@ -45,7 +45,7 @@ for (const file of commandFiles) {
 	const command = module[commandName];
 
 	if (command && "data" in command && "execute" in command) {
-		client.commands.set(command.data.name, command.execute);
+		client.commands.set(command.data.name, command);
 	} else {
 		console.log(
 			`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
@@ -54,6 +54,27 @@ for (const file of commandFiles) {
 }
 
 client.on(Events.InteractionCreate, async (interaction) => {
+	if (interaction.isAutocomplete()) {
+		const command = interaction.client.commands.get(interaction.commandName);
+
+		if (!command) {
+			console.error(
+				`No command matching ${interaction.commandName} was found.`,
+			);
+			return;
+		}
+
+		if (!command.autocomplete) {
+			return;
+		}
+
+		try {
+			await command.autocomplete(interaction);
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
 	if (!interaction.isCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
 
@@ -62,20 +83,22 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		return;
 	}
 
-	try {
-		await command(interaction);
-	} catch (error) {
-		console.error(`Error executing ${interaction.commandName}:`, error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({
-				content: "There was an error while executing this command!",
-				flags: MessageFlags.Ephemeral,
-			});
-		} else {
-			await interaction.reply({
-				content: "There was an error while executing this command!",
-				flags: MessageFlags.Ephemeral,
-			});
+	if (interaction.isChatInputCommand()) {
+		try {
+			await command.execute(interaction);
+		} catch (error) {
+			console.error(`Error executing ${interaction.commandName}:`, error);
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp({
+					content: "There was an error while executing this command!",
+					flags: MessageFlags.Ephemeral,
+				});
+			} else {
+				await interaction.reply({
+					content: "There was an error while executing this command!",
+					flags: MessageFlags.Ephemeral,
+				});
+			}
 		}
 	}
 });

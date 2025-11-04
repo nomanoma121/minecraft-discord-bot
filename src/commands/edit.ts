@@ -1,9 +1,15 @@
 import {
+	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { DIFFICULTY, EMBED_COLORS, GAMEMODE } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	DIFFICULTY,
+	EMBED_COLORS,
+	GAMEMODE,
+} from "../constants";
 import { queries as q } from "../db/queries";
 import { createErrorEmbed } from "../lib/embed";
 import type { Difficulty, Gamemode } from "../types/type";
@@ -17,6 +23,7 @@ export const edit = {
 			option
 				.setName("server-name")
 				.setDescription("Name of the server to edit")
+				.setAutocomplete(true)
 				.setRequired(true),
 		)
 		.addStringOption((option) =>
@@ -58,6 +65,20 @@ export const edit = {
 				.setRequired(false),
 		),
 
+	async autocomplete(interaction: AutocompleteInteraction) {
+		const focusedValue = interaction.options.getFocused();
+		const servers = await q.getAllServers();
+		const filtered = servers.filter((server) =>
+			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
+		);
+		await interaction.respond(
+			filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
+				name: server.name,
+				value: server.name,
+			})),
+		);
+	},
+
 	async execute(interaction: ChatInputCommandInteraction) {
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
@@ -69,12 +90,12 @@ export const edit = {
 
 		const description = interaction.options.getString("description");
 		const maxPlayers = interaction.options.getInteger("max-players");
-		const gamemode = interaction.options.getString("gamemode") as
-			| Gamemode
-			| null;
-		const difficulty = interaction.options.getString("difficulty") as
-			| Difficulty
-			| null;
+		const gamemode = interaction.options.getString(
+			"gamemode",
+		) as Gamemode | null;
+		const difficulty = interaction.options.getString(
+			"difficulty",
+		) as Difficulty | null;
 
 		// Check if at least one field is provided
 		if (!description && !maxPlayers && !gamemode && !difficulty) {

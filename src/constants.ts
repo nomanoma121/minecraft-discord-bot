@@ -27,3 +27,6 @@ export const EMBED_COLORS = {
 	ERROR: 0xff0000,
 	INFO: 0x0099ff,
 } as const;
+
+// Discord API limits
+export const AUTOCOMPLETE_MAX_CHOICES = 25;

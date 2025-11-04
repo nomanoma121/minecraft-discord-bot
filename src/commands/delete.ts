@@ -1,9 +1,10 @@
 import {
+	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { EMBED_COLORS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
@@ -17,8 +18,23 @@ const deleteCommand = {
 			option
 				.setName("server-name")
 				.setDescription("Name of the server to delete")
+				.setAutocomplete(true)
 				.setRequired(true),
 		),
+
+	async autocomplete(interaction: AutocompleteInteraction) {
+		const focusedValue = interaction.options.getFocused();
+		const servers = await q.getAllServers();
+		const filtered = servers.filter((server) =>
+			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
+		);
+		await interaction.respond(
+			filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
+				name: server.name,
+				value: server.name,
+			})),
+		);
+	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
 		const serverName = interaction.options.getString("server-name");

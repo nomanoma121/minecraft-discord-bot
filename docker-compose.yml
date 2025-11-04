@@ -7,12 +7,15 @@ services:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - CLIENT_ID=${CLIENT_ID}
       - GUILD_ID=${GUILD_ID}
-      - DB_FILE_NAME=database.db
+      - DB_FILE_NAME=/data/database.db
     volumes:
-      # Database persistence
-      - ./database.db:/usr/src/app/database.db
+      # Database persistence using named volume
+      - bot-data:/data
       # Docker socket for managing Minecraft server containers
       - /var/run/docker.sock:/var/run/docker.sock
     # Grant Docker socket access (if permission issues occur)
     user: root
+
+volumes:
+  bot-data:
 

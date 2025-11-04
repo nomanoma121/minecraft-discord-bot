@@ -25,7 +25,12 @@ export const list = {
 				return;
 			}
 
-			const runningContainers = await docker.listContainers({ all: false });
+			const runningContainers = await docker.listContainers({
+				all: false,
+				filters: {
+					ancestor: ["itzg/minecraft-server"],
+				},
+			});
 			const runningIds = new Set(
 				runningContainers
 					.map((c) => c.Names?.[0]?.replace(/^\//, ""))

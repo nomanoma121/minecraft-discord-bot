@@ -45,7 +45,12 @@ export const start = {
 				return;
 			}
 
-			const runningContainers = await docker.listContainers({ all: false });
+			const runningContainers = await docker.listContainers({
+				all: false,
+				filters: {
+					ancestor: ["itzg/minecraft-server"],
+				},
+			});
 			if (runningContainers.length > 0) {
 				const serverId = runningContainers[0]?.Names?.[0]?.replace("/", "");
 				if (!serverId) {

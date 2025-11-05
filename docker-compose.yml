@@ -12,6 +12,7 @@ services:
       - bot-data:/data
       # Docker socket for managing Minecraft server containers
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./backups:/backups
     # Grant Docker socket access (if permission issues occur)
     user: root
 

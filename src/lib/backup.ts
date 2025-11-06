@@ -1,8 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
 import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
+import { parseTimestampFromFilename } from "../utils.js";
 import { docker } from "./docker.js";
-import path from "node:path";
-import fs from "node:fs";
 
 export const withSafeSave = async (
 	container: Dockerode.Container,
@@ -49,11 +50,17 @@ export const withSafeSave = async (
 	}
 };
 
-export const getExistingBackups = async (serverId: string): Promise<string[]> => {
-	const backupsDir = path.join(__dirname, "../backups", serverId);
+export const getExistingBackups = async (serverId: string): Promise<Date[]> => {
+	const backupsDir = `/backups/${serverId}`;
 	try {
 		const files = await fs.promises.readdir(backupsDir);
-		return files.filter((file) => file.endsWith(".tar.gz"));
+		const filtered = files
+			.filter((file) => file.endsWith(".tar.gz"))
+			.sort()
+			.reverse();
+		return filtered
+			.map(parseTimestampFromFilename)
+			.filter((date): date is Date => date !== null);
 	} catch (error) {
 		console.error("Error reading backups directory:", error);
 		return [];

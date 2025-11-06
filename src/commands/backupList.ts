@@ -1,16 +1,17 @@
 import {
+	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
 import { queries as q } from "../db/queries";
 import { getExistingBackups } from "../lib/backup";
 import { createErrorEmbed } from "../lib/embed";
-import { parseTimestampFromFilename } from "../utils";
+import { formatDateForDisplay } from "../utils";
 
 export const backupList = {
 	name: "backup-list",
 	data: new SlashCommandBuilder()
-		.setName("backup")
+		.setName("backup-list")
 		.setDescription("Lists all backups for a Minecraft server")
 		.addStringOption((option) =>
 			option
@@ -18,6 +19,23 @@ export const backupList = {
 				.setDescription("Name of the Minecraft server to list backups for.")
 				.setRequired(true),
 		),
+
+	async autocomplete(interaction: AutocompleteInteraction) {
+		const focused = interaction.options.getFocused(true);
+		if (focused.name === "server-name") {
+			const focusedValue = focused.value;
+			const servers = await q.getAllServers();
+			const filtered = servers.filter((server) =>
+				server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
+			);
+			await interaction.respond(
+				filtered.map((server) => ({
+					name: server.name,
+					value: server.name,
+				})),
+			);
+		}
+	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
 		const serverName = interaction.options.getString("server-name");
@@ -40,18 +58,17 @@ export const backupList = {
 			return;
 		}
 
-
-		const backupList = backups.map((file, i) => {
-			const timestamp = parseTimestampFromFilename(file);
-			if (!timestamp) {
-				return "Invalid timestamp";
-			}
-			const formattedTimestamp = timestamp.toLocaleString();
-			if (i === 0) {
-				return `${formattedTimestamp} (Latest)`
-			}
-			return formattedTimestamp;
-		}).join("\n");
-		await interaction.reply(`Backups for server "${serverName}":\n${backupList}`);
+		const backupList = backups
+			.map((backup, i) => {
+				const formattedTimestamp = formatDateForDisplay(backup);
+				if (i === 0) {
+					return `${formattedTimestamp} (Latest)`;
+				}
+				return formattedTimestamp;
+			})
+			.join("\n");
+		await interaction.reply(
+			`Backups for server "${serverName}":\n${backupList}`,
+		);
 	},
 };

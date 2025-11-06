@@ -70,7 +70,7 @@ export const backupCreate = {
 				return;
 			}
 
-			withSafeSave(container, async () => {
+			await withSafeSave(container, async () => {
 				const timestamp = formatTimestampForFilename(new Date());
 				const backupFileName = `${timestamp}.tar.gz`;
 				const backupFilePath = `/backups/${server.id}/${backupFileName}`;

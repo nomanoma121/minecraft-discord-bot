@@ -1,3 +1,5 @@
+import { createReadStream } from "node:fs";
+import { createGunzip } from "node:zlib";
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
@@ -5,11 +7,9 @@ import {
 } from "discord.js";
 import { queries as q } from "../db/queries";
 import { getExistingBackups } from "../lib/backup";
-import { formatDateForDisplay, formatTimestampForFilename } from "../utils";
-import { createGunzip } from "node:zlib";
-import { createErrorEmbed } from "../lib/embed";
 import { docker } from "../lib/docker";
-import { createReadStream } from "node:fs";
+import { createErrorEmbed } from "../lib/embed";
+import { formatDateForDisplay, formatTimestampForFilename } from "../utils";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";
@@ -80,7 +80,9 @@ export const backupRestore = {
 		const backupTimestamp = interaction.options.getString(BACKUP_OPTION);
 		if (!serverName || !backupTimestamp) {
 			await interaction.reply({
-				embeds: [createErrorEmbed("Server name and backup timestamp are required.")],
+				embeds: [
+					createErrorEmbed("Server name and backup timestamp are required."),
+				],
 			});
 			return;
 		}
@@ -102,7 +104,9 @@ export const backupRestore = {
 			return;
 		}
 
-		await interaction.reply(`⌛ Restoring backup for server "${serverName}"...`);
+		await interaction.reply(
+			`⌛ Restoring backup for server "${serverName}"...`,
+		);
 
 		try {
 			const container = docker.getContainer(server.id);
@@ -110,7 +114,11 @@ export const backupRestore = {
 
 			if (containerInfo.State.Running) {
 				await interaction.editReply({
-					embeds: [createErrorEmbed(`Server "${serverName}" must be stopped to restore a backup.`)],
+					embeds: [
+						createErrorEmbed(
+							`Server "${serverName}" must be stopped to restore a backup.`,
+						),
+					],
 				});
 				return;
 			}
@@ -126,13 +134,19 @@ export const backupRestore = {
 				path: "/data",
 			});
 
-			await interaction.editReply(`✅ Backup restored successfully for server "${serverName}".`);
+			await interaction.editReply(
+				`✅ Backup restored successfully for server "${serverName}".`,
+			);
 		} catch (error) {
 			if (!(error instanceof Error)) {
 				throw error;
 			}
 			await interaction.editReply({
-				embeds: [createErrorEmbed(`Failed to restore backup for server "${serverName}": ${error.message}`)],
+				embeds: [
+					createErrorEmbed(
+						`Failed to restore backup for server "${serverName}": ${error.message}`,
+					),
+				],
 			});
 		}
 	},

@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import path from "node:path";
 import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
 import { parseTimestampFromFilename } from "../utils.js";

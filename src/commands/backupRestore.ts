@@ -128,10 +128,17 @@ export const backupRestore = {
 			const backupStream = createReadStream(backupFilePath);
 			const gunzip = createGunzip();
 
-			backupStream.pipe(gunzip);
+			await new Promise<void>((resolve, reject) => {
+				backupStream.on("error", reject);
+				gunzip.on("error", reject);
+				backupStream.pipe(gunzip);
 
-			await container.putArchive(gunzip, {
-				path: "/data",
+				container
+					.putArchive(gunzip, {
+						path: "/data",
+					})
+					.then(() => resolve())
+					.catch(reject);
 			});
 
 			await interaction.editReply(

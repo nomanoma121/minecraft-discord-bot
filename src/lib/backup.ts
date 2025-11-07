@@ -4,6 +4,13 @@ import type Dockerode from "dockerode";
 import { parseTimestampFromFilename } from "../utils.js";
 import { docker } from "./docker.js";
 
+/**
+ * Executes save-off, save-all, and save-on commands around a callback to ensure
+ * Minecraft server data integrity during backup operations.
+ * Automatically re-enables saves even if the callback throws an error.
+ * @param container - The Docker container running the Minecraft server
+ * @param callback - The backup operation to perform while saves are disabled
+ */
 export const withSafeSave = async (
 	container: Dockerode.Container,
 	callback: () => Promise<void>,

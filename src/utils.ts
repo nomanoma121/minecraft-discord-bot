@@ -1,3 +1,8 @@
+/**
+ * Formats a Date object into a filename-safe timestamp string.
+ * Converts ISO format by replacing colons and periods with hyphens.
+ * @example "2025-11-05T23:29:02.908Z" becomes "2025-11-05T23-29-02-908Z"
+ */
 export const formatTimestampForFilename = (date: Date): string => {
 	return date.toISOString().replace(/[:.]/g, "-");
 };

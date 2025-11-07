@@ -17,6 +17,7 @@ export const backupList = {
 			option
 				.setName("server-name")
 				.setDescription("Name of the Minecraft server to list backups for.")
+				.setAutocomplete(true)
 				.setRequired(true),
 		),
 

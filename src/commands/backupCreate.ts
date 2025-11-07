@@ -11,6 +11,8 @@ import { withSafeSave } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { formatTimestampForFilename } from "../utils";
+import { getExistingBackups, getTotalBackupCounts } from "../lib/backup";
+import { Config } from "../config";
 
 export const backupCreate = {
 	name: "backup-create",
@@ -53,6 +55,22 @@ export const backupCreate = {
 			await interaction.reply({
 				embeds: [
 					createErrorEmbed(`No server found with the name "${serverName}".`),
+				],
+			});
+			return;
+		}
+
+		const serverBackups = await getExistingBackups(server.id);
+		const totalBackupCounts = await getTotalBackupCounts();
+		if (
+			totalBackupCounts >= Config.maxTotalBackupCount ||
+			serverBackups.length >= Config.maxBackupCountPerServer
+		) {
+			await interaction.reply({
+				embeds: [
+					createErrorEmbed(
+						`Backup limit reached. Max total backups: ${Config.maxTotalBackupCount}, Max backups per server: ${Config.maxBackupCountPerServer}. Please delete old backups before creating new ones.`,
+					),
 				],
 			});
 			return;

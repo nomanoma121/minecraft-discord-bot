@@ -65,3 +65,21 @@ export const getExistingBackups = async (serverId: string): Promise<Date[]> => {
 		return [];
 	}
 };
+
+export const getTotalBackupCounts = async (): Promise<number> => {
+	const backupsRootDir = `/backups`;
+	try {
+		const serverDirs = await fs.promises.readdir(backupsRootDir);
+		let totalCount = 0;
+		for (const serverId of serverDirs) {
+			const serverBackupDir = `${backupsRootDir}/${serverId}`;
+			const files = await fs.promises.readdir(serverBackupDir);
+			const backupFiles = files.filter((file) => file.endsWith(".tar.gz"));
+			totalCount += backupFiles.length;
+		}
+		return totalCount;
+	} catch (error) {
+		console.error("Error reading backups directory:", error);
+		return 0;
+	}
+};

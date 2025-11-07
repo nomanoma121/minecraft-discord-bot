@@ -9,8 +9,7 @@ import {
 	EMBED_COLORS,
 	HEALTH_STATUS,
 } from "../constants";
-import { queries as q } from "../db/queries";
-import { docker } from "../lib/docker";
+import { docker, filterLabelBuilder } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 
 const HEALTH_INTERVAL = 5000;
@@ -68,8 +67,8 @@ export const start = {
 			const runningContainers = await docker.listContainers({
 				all: false,
 				filters: {
-					ancestor: ["itzg/minecraft-server"],
-				},
+					label: 
+				}
 			});
 			if (runningContainers.length > 0) {
 				const serverId = runningContainers[0]?.Names?.[0]?.replace("/", "");

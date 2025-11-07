@@ -5,10 +5,9 @@ import {
 } from "discord.js";
 import { Config } from "../config";
 import { DIFFICULTY, EMBED_COLORS, GAMEMODE, SERVER_TYPE } from "../constants";
-import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import type { Difficulty, Gamemode, ServerType } from "../types/type";
+import type { Difficulty, Gamemode, ServerType } from "../types/server";
 
 export const create = {
 	name: "create",
@@ -150,6 +149,19 @@ export const create = {
 			await docker.createContainer({
 				name: server.id,
 				Image: "itzg/minecraft-server",
+				Labels: {
+					"mc-bot.managed": "true",
+					"mc-bot.owner-id": server.ownerId,
+					"mc-bot.server-id": server.id,
+					"mc-bot.user-id": interaction.user.id,
+					"mc-bot.server-name": serverConfig.name,
+					"mc-bot.timestamp": new Date().toISOString(),
+					"mc-bot.version": serverConfig.version,
+					"mc-bot.max-players": String(serverConfig.maxPlayers),
+					"mc-bot.difficulty": serverConfig.difficulty,
+					"mc-bot.type": serverConfig.type,
+					"mc-bot.gamemode": serverConfig.gamemode,
+				},
 				Env: [
 					"EULA=TRUE",
 					`SERVER_NAME=${serverConfig.name}`,

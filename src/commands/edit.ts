@@ -10,9 +10,8 @@ import {
 	EMBED_COLORS,
 	GAMEMODE,
 } from "../constants";
-import { queries as q } from "../db/queries";
 import { createErrorEmbed } from "../lib/embed";
-import type { Difficulty, Gamemode } from "../types/type";
+import type { Difficulty, Gamemode } from "../types/server";
 
 export const edit = {
 	name: "edit",

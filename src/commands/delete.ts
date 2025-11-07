@@ -5,7 +5,6 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
-import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 

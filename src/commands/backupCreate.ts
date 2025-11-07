@@ -7,7 +7,6 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { queries as q } from "../db/queries";
 import {
 	getExistingBackups,
 	getTotalBackupCounts,

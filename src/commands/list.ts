@@ -2,7 +2,6 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { queries as q } from "../db/queries";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 
@@ -29,6 +28,10 @@ export const list = {
 				all: false,
 				filters: {
 					ancestor: ["itzg/minecraft-server"],
+					label: [
+						"mc-bot.managed=true",
+						`mc-bot.server-id=${server.id}`,
+					]
 				},
 			});
 			const runningIds = new Set(

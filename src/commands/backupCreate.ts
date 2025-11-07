@@ -21,6 +21,7 @@ export const backupCreate = {
 			option
 				.setName("server-name")
 				.setDescription("Name of the Minecraft server to back up.")
+				.setAutocomplete(true)
 				.setRequired(true),
 		),
 

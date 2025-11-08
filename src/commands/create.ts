@@ -5,7 +5,12 @@ import {
 } from "discord.js";
 import { Config } from "../config";
 import { DIFFICULTY, EMBED_COLORS, GAMEMODE, SERVER_TYPE } from "../constants";
-import { docker, filterLabelBuilder, parseLabels, labelBuilder } from "../lib/docker";
+import {
+	docker,
+	filterLabelBuilder,
+	labelBuilder,
+	parseLabels,
+} from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import type { Difficulty, Gamemode, ServerType } from "../types/server";
 

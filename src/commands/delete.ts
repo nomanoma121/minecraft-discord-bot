@@ -5,9 +5,9 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
-import { docker, parseLabels, filterLabelBuilder } from "../lib/docker";
+import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { getAllServers, getServerByName } from "../utils";
+import { getAllServers } from "../utils";
 
 const deleteCommand = {
 	name: "delete",
@@ -51,9 +51,9 @@ const deleteCommand = {
 			const containers = await docker.listContainers({
 				all: false,
 				filters: {
-					labels: filterLabelBuilder({ managed: true, name: serverName }) 
-				}
-			})
+					labels: filterLabelBuilder({ managed: true, name: serverName }),
+				},
+			});
 			const container = containers[0];
 			if (!container) {
 				await interaction.editReply({
@@ -94,7 +94,6 @@ const deleteCommand = {
 			const containerInstance = docker.getContainer(container.Id);
 
 			await containerInstance.remove({ v: true });
-
 
 			await interaction.editReply(
 				`✅ Check server "${serverName}"\n✅ Remove server\n\n`,

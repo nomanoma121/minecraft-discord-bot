@@ -9,9 +9,9 @@ import {
 	EMBED_COLORS,
 	HEALTH_STATUS,
 } from "../constants";
-import { docker } from "../lib/docker";
+import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { getAllServers, getServerByName, getServerById } from "../utils";
+import { getAllServers, getRunningServers } from "../utils";
 
 const HEALTH_INTERVAL = 5000;
 const HEALTH_TIMEOUT = 300000;
@@ -55,40 +55,30 @@ export const start = {
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		try {
-			const server = await getServerByName(serverName);
-			if (!server) {
+			const containers = await docker.listContainers({
+				all: true,
+				filters: {
+					labels: filterLabelBuilder({ managed: true, name: serverName }),
+				},
+			});
+			const container = containers[0];
+			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createErrorEmbed(
+							`Server with name "${serverName}" does not exist.`,
+						),
 					],
 				});
 				return;
 			}
 
-			const runningContainers = await docker.listContainers({
-				all: false,
-				filters: {
-					label: [],
-				},
-			});
-			if (runningContainers.length > 0) {
-				const serverId = runningContainers[0]?.Names?.[0]?.replace("/", "");
-				if (!serverId) {
-					await interaction.editReply({
-						embeds: [
-							createErrorEmbed(
-								"An unexpected error occurred. Please try again later.",
-							),
-						],
-					});
-					return;
-				}
-
-				const serverName = await getServerById(serverId);
+			const runningServers = await getRunningServers();
+			if (runningServers.length > 0) {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Another server "${serverName?.name}" is already running. Please stop it before starting a new one.`,
+							`Another server is already running. Please stop it before starting a new one.`,
 						),
 					],
 				});
@@ -99,23 +89,8 @@ export const start = {
 				`✅ Check server "${serverName}"\n⌛ Starting Minecraft Server...`,
 			);
 
-			const container = docker.getContainer(server.id);
-
-			try {
-				await container.inspect();
-			} catch (_error) {
-				// TODO: Database cleanup if container is missing
-				await interaction.editReply({
-					embeds: [
-						createErrorEmbed(
-							`Server "${serverName}" not found. The server may have been deleted.`,
-						),
-					],
-				});
-				return;
-			}
-
-			await container.start();
+			const containerInstance = docker.getContainer(container.Id);
+			await containerInstance.start();
 
 			await interaction.editReply(
 				`✅ Check server "${serverName}"\n✅ Start container\n⌛ Waiting for Minecraft server to be ready...`,
@@ -127,7 +102,7 @@ export const start = {
 			while (Date.now() - startTime < HEALTH_TIMEOUT) {
 				await new Promise((resolve) => setTimeout(resolve, HEALTH_INTERVAL));
 
-				const info = await container.inspect();
+				const info = await containerInstance.inspect();
 				const healthStatus = info.State.Health?.Status;
 
 				if (healthStatus === HEALTH_STATUS.HEALTHY) {
@@ -154,6 +129,8 @@ export const start = {
 			await interaction.editReply(
 				`✅ Check server "${serverName}"\n✅ Start server\n✅ Minecraft server ready\n\n`,
 			);
+
+			const server = parseLabels(container.Labels);
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Minecraft Server "${serverName}" Started`)

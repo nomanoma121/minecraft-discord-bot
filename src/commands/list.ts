@@ -4,6 +4,7 @@ import {
 } from "discord.js";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { getRunningServers } from "../utils";
 
 export const list = {
 	name: "list",
@@ -18,17 +19,16 @@ export const list = {
 			const container = await docker.listContainers({
 				all: false,
 				filters: {
-					label: filterLabelBuilder({ managed: true })
+					label: filterLabelBuilder({ managed: true }),
 				},
 			});
 			const servers = container.map((c) => parseLabels(c.Labels));
+			const runningServers = await getRunningServers();
 
 			let message = `**Minecraft Servers (${servers.length}/${10}):**\n\n`;
 
 			for (const server of servers) {
-				const isRunning = container.some((c) =>
-					parseLabels(c.Labels).id === server.id && c.State === "running"
-				);
+				const isRunning = runningServers.some((s) => s.id === server.id);
 				const statusText = isRunning ? "Running" : "Stopped";
 
 				message += `- **${server.name}** - ${statusText}\n`;

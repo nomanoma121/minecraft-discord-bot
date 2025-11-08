@@ -1,5 +1,4 @@
-import { docker } from "./lib/docker";
-import { filterLabelBuilder, parseLabels } from "./lib/docker";
+import { docker, filterLabelBuilder, parseLabels } from "./lib/docker";
 import type { Server } from "./types/server";
 
 /**
@@ -46,7 +45,7 @@ export const getAllServers = async () => {
 	});
 	const servers = containers.map((c) => parseLabels(c.Labels));
 	return servers;
-}
+};
 
 export const getServerById = async (id: string): Promise<Server> => {
 	const containers = await docker.listContainers({
@@ -55,7 +54,8 @@ export const getServerById = async (id: string): Promise<Server> => {
 			label: filterLabelBuilder({ id, managed: true }),
 		},
 	});
-	if (!containers[0]?.Labels) throw new Error(`Server with ID "${id}" not found.`);
+	if (!containers[0]?.Labels)
+		throw new Error(`Server with ID "${id}" not found.`);
 	const server = parseLabels(containers[0].Labels);
 	return server;
 };
@@ -67,7 +67,20 @@ export const getServerByName = async (name: string): Promise<Server> => {
 			label: filterLabelBuilder({ name, managed: true }),
 		},
 	});
-	if (!containers[0]?.Labels) throw new Error(`Server with name "${name}" not found.`);
+	if (!containers[0]?.Labels)
+		throw new Error(`Server with name "${name}" not found.`);
 	const server = parseLabels(containers[0].Labels);
 	return server;
-}
+};
+
+export const getRunningServers = async () => {
+	const containers = await docker.listContainers({
+		all: false,
+		filters: {
+			label: filterLabelBuilder({ managed: true }),
+			status: ["running"],
+		},
+	});
+	const servers = containers.map((c) => parseLabels(c.Labels));
+	return servers;
+};

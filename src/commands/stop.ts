@@ -51,9 +51,9 @@ export const stop = {
 			const containers = await docker.listContainers({
 				all: false,
 				filters: {
-					labels: filterLabelBuilder({ managed: true, name: serverName }) 
-				}
-			})
+					labels: filterLabelBuilder({ managed: true, name: serverName }),
+				},
+			});
 			const container = containers[0];
 			if (!container) {
 				await interaction.editReply({

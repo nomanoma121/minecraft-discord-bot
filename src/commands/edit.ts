@@ -4,16 +4,22 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
+import { Config } from "../config";
 import {
 	AUTOCOMPLETE_MAX_CHOICES,
 	DIFFICULTY,
 	EMBED_COLORS,
 	GAMEMODE,
 } from "../constants";
+import {
+	docker,
+	filterLabelBuilder,
+	labelBuilder,
+	parseLabels,
+} from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import type { Difficulty, Gamemode } from "../types/server";
-import { getAllServers } from "../utils"
-import { docker, parseLabels, filterLabelBuilder } from "../lib/docker";
+import { getAllServers } from "../utils";
 
 export const edit = {
 	name: "edit",
@@ -64,6 +70,12 @@ export const edit = {
 					{ name: "hard", value: DIFFICULTY.HARD },
 				)
 				.setRequired(false),
+		)
+		.addStringOption((option) =>
+			option
+				.setName("version")
+				.setDescription("Minecraft version")
+				.setRequired(false),
 		),
 
 	async autocomplete(interaction: AutocompleteInteraction) {
@@ -97,8 +109,8 @@ export const edit = {
 		const difficulty = interaction.options.getString(
 			"difficulty",
 		) as Difficulty | null;
+		const version = interaction.options.getString("version");
 
-		// Check if at least one field is provided
 		if (!description && !maxPlayers && !gamemode && !difficulty) {
 			await interaction.reply({
 				embeds: [
@@ -117,9 +129,9 @@ export const edit = {
 			const containers = await docker.listContainers({
 				all: false,
 				filters: {
-					labels: filterLabelBuilder({ managed: true, name: serverName }) 
-				}
-			})
+					labels: filterLabelBuilder({ managed: true, name: serverName }),
+				},
+			});
 			const container = containers[0];
 			if (!container) {
 				await interaction.editReply({
@@ -146,19 +158,43 @@ export const edit = {
 				`✅ Check server "${serverName}"\n⌛ Updating configuration...`,
 			);
 
-			const updates: {
-				description?: string;
-				maxPlayers?: number;
-				gamemode?: Gamemode;
-				difficulty?: Difficulty;
-			} = {};
+			const updatedServer = { ...server };
 
-			if (description !== null) updates.description = description;
-			if (maxPlayers !== null) updates.maxPlayers = maxPlayers;
-			if (gamemode !== null) updates.gamemode = gamemode;
-			if (difficulty !== null) updates.difficulty = difficulty;
+			if (serverName) updatedServer.name = serverName;
+			if (description) updatedServer.description = description;
+			if (maxPlayers) updatedServer.maxPlayers = maxPlayers;
+			if (gamemode) updatedServer.gamemode = gamemode;
+			if (difficulty) updatedServer.difficulty = difficulty;
+			if (version) updatedServer.version = version;
 
-			const 
+			const containerInstance = docker.getContainer(container.Id);
+
+			await containerInstance.remove({ v: false });
+			await docker.createContainer({
+				Image: container.Image,
+				Labels: labelBuilder({
+					...server,
+					...updatedServer,
+				}),
+				Env: [
+					"EULA=TRUE",
+					`SERVER_NAME=${updatedServer.name}`,
+					`MOTD=${updatedServer.description}`,
+					`VERSION=${updatedServer.version}`,
+					`GAMEMODE=${updatedServer.gamemode}`,
+					`DIFFICULTY=${updatedServer.difficulty}`,
+					`TYPE=${server.type}`, // type is not editable
+				],
+				HostConfig: {
+					PortBindings: {
+						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],
+					},
+					Binds: [`${server.id}:/data`],
+				},
+				ExposedPorts: {
+					[`${Config.port}/tcp`]: {},
+				},
+			});
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Server "${serverName}" Updated`)

@@ -38,7 +38,7 @@ export const formatDateForDisplay = (date: Date): string => {
 
 export const getAllServers = async () => {
 	const containers = await docker.listContainers({
-		all: false,
+		all: true,
 		filters: {
 			label: filterLabelBuilder({ managed: true }),
 		},
@@ -49,7 +49,7 @@ export const getAllServers = async () => {
 
 export const getServerById = async (id: string): Promise<Server> => {
 	const containers = await docker.listContainers({
-		all: false,
+		all: true,
 		filters: {
 			label: filterLabelBuilder({ id, managed: true }),
 		},
@@ -62,7 +62,7 @@ export const getServerById = async (id: string): Promise<Server> => {
 
 export const getServerByName = async (name: string): Promise<Server> => {
 	const containers = await docker.listContainers({
-		all: false,
+		all: true,
 		filters: {
 			label: filterLabelBuilder({ name, managed: true }),
 		},

@@ -121,7 +121,7 @@ export const create = {
 
 		try {
 			const containers = await docker.listContainers({
-				all: false,
+				all: true,
 				filters: {
 					label: filterLabelBuilder({ managed: true }),
 				},
@@ -143,7 +143,7 @@ export const create = {
 				const labels = parseLabels(container.Labels);
 				return labels.name === server.name;
 			});
-			if (!isNameTaken) {
+			if (isNameTaken) {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(

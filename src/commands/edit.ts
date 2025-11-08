@@ -170,9 +170,10 @@ export const edit = {
 
 			await containerInstance.remove({ v: false });
 			await docker.createContainer({
-				name: updatedServer.name,
+				name: updatedServer.id,
 				Image: container.Image,
 				Labels: labelBuilder({
+					managed: true,
 					...server,
 					...updatedServer,
 				}),

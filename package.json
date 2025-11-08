@@ -24,7 +24,5 @@
   "dependencies": {
     "discord.js": "^14.24.1",
     "dockerode": "^4.0.9",
-    "drizzle-orm": "^0.44.7",
-    "drizzle-kit": "^0.31.6"
   }
 }

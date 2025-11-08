@@ -22,4 +22,4 @@ export type Server = {
 	description: string;
 	createdAt: Date;
 	updatedAt: Date;
-}
+};

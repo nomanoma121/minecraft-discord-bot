@@ -12,6 +12,8 @@ import {
 } from "../constants";
 import { createErrorEmbed } from "../lib/embed";
 import type { Difficulty, Gamemode } from "../types/server";
+import { getAllServers } from "../utils"
+import { docker, parseLabels, filterLabelBuilder } from "../lib/docker";
 
 export const edit = {
 	name: "edit",
@@ -66,7 +68,7 @@ export const edit = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
-		const servers = await q.getAllServers();
+		const servers = await getAllServers();
 		const filtered = servers.filter((server) =>
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
@@ -112,8 +114,14 @@ export const edit = {
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		try {
-			const server = await q.getServerByName(serverName);
-			if (!server) {
+			const containers = await docker.listContainers({
+				all: false,
+				filters: {
+					labels: filterLabelBuilder({ managed: true, name: serverName }) 
+				}
+			})
+			const container = containers[0];
+			if (!container) {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(`No server found with the name "${serverName}".`),
@@ -122,7 +130,7 @@ export const edit = {
 				return;
 			}
 
-			// Check if user is the owner
+			const server = parseLabels(container.Labels);
 			if (server.ownerId !== interaction.user.id) {
 				await interaction.editReply({
 					embeds: [
@@ -138,7 +146,6 @@ export const edit = {
 				`✅ Check server "${serverName}"\n⌛ Updating configuration...`,
 			);
 
-			// Build update object
 			const updates: {
 				description?: string;
 				maxPlayers?: number;
@@ -151,14 +158,7 @@ export const edit = {
 			if (gamemode !== null) updates.gamemode = gamemode;
 			if (difficulty !== null) updates.difficulty = difficulty;
 
-			const updatedServer = await q.updateServer(serverName, updates);
-
-			if (!updatedServer) {
-				await interaction.editReply({
-					embeds: [createErrorEmbed("Failed to update server configuration.")],
-				});
-				return;
-			}
+			const 
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Server "${serverName}" Updated`)

@@ -2,7 +2,7 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { docker } from "../lib/docker";
+import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 
 export const list = {
@@ -15,35 +15,20 @@ export const list = {
 		await interaction.reply("⌛ Fetching server list...");
 
 		try {
-			const servers = await q.getAllServers();
-
-			if (servers.length === 0) {
-				await interaction.editReply(
-					"No servers found. Use `/create` to create your first server!",
-				);
-				return;
-			}
-
-			const runningContainers = await docker.listContainers({
+			const container = await docker.listContainers({
 				all: false,
 				filters: {
-					ancestor: ["itzg/minecraft-server"],
-					label: [
-						"mc-bot.managed=true",
-						`mc-bot.server-id=${server.id}`,
-					]
+					label: filterLabelBuilder({ managed: true })
 				},
 			});
-			const runningIds = new Set(
-				runningContainers
-					.map((c) => c.Names?.[0]?.replace(/^\//, ""))
-					.filter((name): name is string => name !== undefined),
-			);
+			const servers = container.map((c) => parseLabels(c.Labels));
 
 			let message = `**Minecraft Servers (${servers.length}/${10}):**\n\n`;
 
 			for (const server of servers) {
-				const isRunning = runningIds.has(server.id);
+				const isRunning = container.some((c) =>
+					parseLabels(c.Labels).id === server.id && c.State === "running"
+				);
 				const statusText = isRunning ? "Running" : "Stopped";
 
 				message += `- **${server.name}** - ${statusText}\n`;

@@ -8,6 +8,7 @@ import type Dockerode from "dockerode";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { getAllServers, getServerByName } from "../utils";
 
 export const status = {
 	name: "status",
@@ -24,7 +25,7 @@ export const status = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
-		const servers = await q.getAllServers();
+		const servers = await getAllServers();
 		const filtered = servers.filter((server) =>
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
@@ -48,7 +49,7 @@ export const status = {
 		await interaction.reply(`⌛ Fetching status for server "${serverName}"...`);
 
 		try {
-			const server = await q.getServerByName(serverName);
+			const server = await getServerByName(serverName);
 			if (!server) {
 				await interaction.editReply({
 					embeds: [

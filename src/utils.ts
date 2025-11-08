@@ -1,3 +1,7 @@
+import { docker } from "./lib/docker";
+import { filterLabelBuilder, parseLabels } from "./lib/docker";
+import type { Server } from "./types/server";
+
 /**
  * Formats a Date object into a filename-safe timestamp string.
  * Converts ISO format by replacing colons and periods with hyphens.
@@ -32,3 +36,38 @@ export const formatDateForDisplay = (date: Date): string => {
 
 	return `${year}-${month}-${day} ${hour}:${minute}`;
 };
+
+export const getAllServers = async () => {
+	const containers = await docker.listContainers({
+		all: false,
+		filters: {
+			label: filterLabelBuilder({ managed: true }),
+		},
+	});
+	const servers = containers.map((c) => parseLabels(c.Labels));
+	return servers;
+}
+
+export const getServerById = async (id: string): Promise<Server> => {
+	const containers = await docker.listContainers({
+		all: false,
+		filters: {
+			label: filterLabelBuilder({ id, managed: true }),
+		},
+	});
+	if (!containers[0]?.Labels) throw new Error(`Server with ID "${id}" not found.`);
+	const server = parseLabels(containers[0].Labels);
+	return server;
+};
+
+export const getServerByName = async (name: string): Promise<Server> => {
+	const containers = await docker.listContainers({
+		all: false,
+		filters: {
+			label: filterLabelBuilder({ name, managed: true }),
+		},
+	});
+	if (!containers[0]?.Labels) throw new Error(`Server with name "${name}" not found.`);
+	const server = parseLabels(containers[0].Labels);
+	return server;
+}

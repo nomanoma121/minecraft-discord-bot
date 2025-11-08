@@ -5,7 +5,7 @@ import {
 } from "discord.js";
 import { Config } from "../config";
 import { DIFFICULTY, EMBED_COLORS, GAMEMODE, SERVER_TYPE } from "../constants";
-import { docker } from "../lib/docker";
+import { docker, filterLabelBuilder, parseLabels, labelBuilder } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import type { Difficulty, Gamemode, ServerType } from "../types/server";
 
@@ -93,54 +93,61 @@ export const create = {
 			return;
 		}
 
-		const serverConfig = {
+		const server = {
+			id: crypto.randomUUID(),
+			ownerId: interaction.user.id,
 			name: serverName,
 			version: version,
-			maxPlayers: 20,
-			difficulty: (interaction.options.getString("difficulty") ??
-				DIFFICULTY.NORMAL) as Difficulty,
-			type: (interaction.options.getString("server-type") ??
-				SERVER_TYPE.PAPER) as ServerType,
-			gamemode: (interaction.options.getString("gamemode") ??
-				GAMEMODE.SURVIVAL) as Gamemode,
-			description: interaction.options.getString("description") ?? "",
+			maxPlayers: Number(interaction.options.getString("max-players")),
+			difficulty:
+				(interaction.options.getString("difficulty") as Difficulty) ||
+				DIFFICULTY.NORMAL,
+			type:
+				(interaction.options.getString("server-type") as ServerType) ||
+				SERVER_TYPE.PAPER,
+			gamemode:
+				(interaction.options.getString("gamemode") as Gamemode) ||
+				GAMEMODE.SURVIVAL,
+			description:
+				interaction.options.getString("description") || "A Minecraft server",
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		};
 
-		const existingServerCount = await q.getCurrentServerCount();
-		if (existingServerCount >= Config.maxServerCount) {
-			await interaction.editReply({
-				embeds: [
-					createErrorEmbed(
-						"The maximum number of servers has been reached. Please try again later.",
-					),
-				],
-			});
-			return;
-		}
-		const isNameAvailable = await q.isServerNameAvailable(serverConfig.name);
-		if (!isNameAvailable) {
-			await interaction.editReply({
-				embeds: [
-					createErrorEmbed(
-						`The server name "${serverConfig.name}" is already taken. Please choose a different name.`,
-					),
-				],
-			});
-			return;
-		}
-
 		try {
-			const server = await q.createServer(interaction.user.id, {
-				name: serverConfig.name,
-				version: serverConfig.version,
-				maxPlayers: serverConfig.maxPlayers,
-				difficulty: serverConfig.difficulty,
-				type: serverConfig.type,
-				gamemode: serverConfig.gamemode,
-				description: serverConfig.description,
+			const containers = await docker.listContainers({
+				all: false,
+				filters: {
+					label: filterLabelBuilder({ managed: true }),
+				},
 			});
 
-			console.log("Minecraft server record created in the database:", server);
+			const existingServerCount = containers.length;
+			if (existingServerCount >= Config.maxServerCount) {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							"The maximum number of servers has been reached. Please try again later.",
+						),
+					],
+				});
+				return;
+			}
+
+			const isNameAvailable = containers.some((container) => {
+				const labels = parseLabels(container.Labels);
+				return labels.name === server.name;
+			});
+			if (!isNameAvailable) {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							`The server name "${server.name}" is already taken. Please choose a different name.`,
+						),
+					],
+				});
+				return;
+			}
 
 			await docker.createVolume({
 				Name: server.id,
@@ -149,27 +156,18 @@ export const create = {
 			await docker.createContainer({
 				name: server.id,
 				Image: "itzg/minecraft-server",
-				Labels: {
-					"mc-bot.managed": "true",
-					"mc-bot.owner-id": server.ownerId,
-					"mc-bot.server-id": server.id,
-					"mc-bot.user-id": interaction.user.id,
-					"mc-bot.server-name": serverConfig.name,
-					"mc-bot.timestamp": new Date().toISOString(),
-					"mc-bot.version": serverConfig.version,
-					"mc-bot.max-players": String(serverConfig.maxPlayers),
-					"mc-bot.difficulty": serverConfig.difficulty,
-					"mc-bot.type": serverConfig.type,
-					"mc-bot.gamemode": serverConfig.gamemode,
-				},
+				Labels: labelBuilder({
+					managed: true,
+					...server,
+				}),
 				Env: [
 					"EULA=TRUE",
-					`SERVER_NAME=${serverConfig.name}`,
-					`MOTD=${serverConfig.description}`,
-					`VERSION=${serverConfig.version}`,
-					`GAMEMODE=${serverConfig.gamemode}`,
-					`DIFFICULTY=${serverConfig.difficulty}`,
-					`TYPE=${serverConfig.type}`,
+					`SERVER_NAME=${server.name}`,
+					`MOTD=${server.description}`,
+					`VERSION=${server.version}`,
+					`GAMEMODE=${server.gamemode}`,
+					`DIFFICULTY=${server.difficulty}`,
+					`TYPE=${server.type}`,
 				],
 				HostConfig: {
 					PortBindings: {

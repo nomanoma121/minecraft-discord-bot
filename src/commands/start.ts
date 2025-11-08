@@ -9,8 +9,9 @@ import {
 	EMBED_COLORS,
 	HEALTH_STATUS,
 } from "../constants";
-import { docker, filterLabelBuilder } from "../lib/docker";
+import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { getAllServers, getServerByName, getServerById } from "../utils";
 
 const HEALTH_INTERVAL = 5000;
 const HEALTH_TIMEOUT = 300000;
@@ -30,7 +31,7 @@ export const start = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
-		const servers = await q.getAllServers();
+		const servers = await getAllServers();
 		const filtered = servers.filter((server) =>
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
@@ -54,7 +55,7 @@ export const start = {
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		try {
-			const server = await q.getServerByName(serverName);
+			const server = await getServerByName(serverName);
 			if (!server) {
 				await interaction.editReply({
 					embeds: [
@@ -67,8 +68,8 @@ export const start = {
 			const runningContainers = await docker.listContainers({
 				all: false,
 				filters: {
-					label: 
-				}
+					label: [],
+				},
 			});
 			if (runningContainers.length > 0) {
 				const serverId = runningContainers[0]?.Names?.[0]?.replace("/", "");
@@ -83,7 +84,7 @@ export const start = {
 					return;
 				}
 
-				const serverName = await q.getServerById(serverId);
+				const serverName = await getServerById(serverId);
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(

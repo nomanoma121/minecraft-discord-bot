@@ -97,6 +97,13 @@ export const backupRestore = {
 			return;
 		}
 
+		if (server.ownerId !== interaction.user.id) {
+			await interaction.reply(
+				`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,
+			);
+			return;
+		}
+
 		const backups = await getExistingBackups(server.id);
 		const backupToRestore = backups.find(
 			(backup) => backup.toString() === backupTimestamp,

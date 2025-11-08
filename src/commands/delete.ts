@@ -8,6 +8,7 @@ import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { getAllServers } from "../utils";
+import { rm } from "fs/promises";
 
 const deleteCommand = {
 	name: "delete",
@@ -94,6 +95,7 @@ const deleteCommand = {
 			const containerInstance = docker.getContainer(container.Id);
 
 			await containerInstance.remove({ v: true });
+			await rm(`./backups/${server.id}`, { recursive: true, force: true });
 
 			await interaction.editReply(
 				`✅ Check server "${serverName}"\n✅ Remove server\n\n`,

@@ -168,7 +168,6 @@ export const edit = {
 
 			const containerInstance = docker.getContainer(container.Id);
 
-			await containerInstance.remove({ v: false });
 			await docker.createContainer({
 				name: updatedServer.id,
 				Image: container.Image,
@@ -196,6 +195,8 @@ export const edit = {
 					[`${Config.port}/tcp`]: {},
 				},
 			});
+
+			await containerInstance.remove({ v: false });
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Server "${serverName}" Updated`)

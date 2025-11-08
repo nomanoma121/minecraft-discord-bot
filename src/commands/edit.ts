@@ -18,7 +18,7 @@ import {
 	parseLabels,
 } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import type { Difficulty, Gamemode } from "../types/server";
+import type { Difficulty, Gamemode, Server } from "../types/server";
 import { getAllServers } from "../utils";
 
 export const edit = {
@@ -154,11 +154,22 @@ export const edit = {
 				return;
 			}
 
+			if (container.State === "running") {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							`Server "${serverName}" is currently running. Please stop the server before editing its configuration.`,
+						),
+					],
+				});
+				return;
+			}
+
 			await interaction.editReply(
 				`✅ Check server "${serverName}"\n⌛ Updating configuration...`,
 			);
 
-			const updatedServer = { ...server };
+			const updatedServer: Server = { ...server, updatedAt: new Date() };
 
 			if (description) updatedServer.description = description;
 			if (maxPlayers) updatedServer.maxPlayers = maxPlayers;

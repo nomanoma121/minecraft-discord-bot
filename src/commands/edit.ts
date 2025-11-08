@@ -111,7 +111,7 @@ export const edit = {
 		) as Difficulty | null;
 		const version = interaction.options.getString("version");
 
-		if (!description && !maxPlayers && !gamemode && !difficulty) {
+		if (!description && !maxPlayers && !gamemode && !difficulty && !version) {
 			await interaction.reply({
 				embeds: [
 					createErrorEmbed(
@@ -127,9 +127,9 @@ export const edit = {
 
 		try {
 			const containers = await docker.listContainers({
-				all: false,
+				all: true,
 				filters: {
-					labels: filterLabelBuilder({ managed: true, name: serverName }),
+					label: filterLabelBuilder({ managed: true, name: serverName }),
 				},
 			});
 			const container = containers[0];
@@ -160,7 +160,6 @@ export const edit = {
 
 			const updatedServer = { ...server };
 
-			if (serverName) updatedServer.name = serverName;
 			if (description) updatedServer.description = description;
 			if (maxPlayers) updatedServer.maxPlayers = maxPlayers;
 			if (gamemode) updatedServer.gamemode = gamemode;
@@ -171,6 +170,7 @@ export const edit = {
 
 			await containerInstance.remove({ v: false });
 			await docker.createContainer({
+				name: updatedServer.name,
 				Image: container.Image,
 				Labels: labelBuilder({
 					...server,

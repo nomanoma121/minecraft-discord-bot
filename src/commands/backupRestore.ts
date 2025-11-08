@@ -5,11 +5,10 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { queries as q } from "../db/queries";
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { formatDateForDisplay, formatTimestampForFilename } from "../utils";
+import { formatDateForDisplay, formatTimestampForFilename, getAllServers, getServerByName } from "../utils";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";
@@ -38,7 +37,7 @@ export const backupRestore = {
 		const focused = interaction.options.getFocused(true);
 		if (focused.name === SERVER_NAME_OPTION) {
 			const focusedValue = focused.value;
-			const servers = await q.getAllServers();
+			const servers = await getAllServers();
 			const filtered = servers.filter((server) =>
 				server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 			);
@@ -55,7 +54,7 @@ export const backupRestore = {
 				return;
 			}
 
-			const server = await q.getServerByName(serverName);
+			const server = await getServerByName(serverName);
 			if (!server) {
 				await interaction.respond([]);
 				return;
@@ -87,7 +86,7 @@ export const backupRestore = {
 			return;
 		}
 
-		const server = await q.getServerByName(serverName);
+		const server = await getServerByName(serverName);
 		if (!server) {
 			await interaction.reply(`No server found with the name "${serverName}".`);
 			return;

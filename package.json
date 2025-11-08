@@ -23,6 +23,6 @@
   },
   "dependencies": {
     "discord.js": "^14.24.1",
-    "dockerode": "^4.0.9",
+    "dockerode": "^4.0.9"
   }
 }

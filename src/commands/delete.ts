@@ -49,9 +49,9 @@ const deleteCommand = {
 
 		try {
 			const containers = await docker.listContainers({
-				all: false,
+				all: true,
 				filters: {
-					labels: filterLabelBuilder({ managed: true, name: serverName }),
+					label: filterLabelBuilder({ managed: true, name: serverName }),
 				},
 			});
 			const container = containers[0];

@@ -14,7 +14,8 @@ import {
 } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { formatTimestampForFilename } from "../utils";
+import { formatTimestampForFilename, getAllServers, getServerByName } from "../utils";
+import { parse } from "node:path";
 
 export const backupCreate = {
 	name: "backup-create",
@@ -31,7 +32,7 @@ export const backupCreate = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
-		const servers = await q.getAllServers();
+		const servers = await getAllServers();
 		const filtered = servers.filter((server) =>
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
@@ -52,7 +53,7 @@ export const backupCreate = {
 			return;
 		}
 
-		const server = await q.getServerByName(serverName);
+		const server = await getServerByName(serverName);
 		if (!server) {
 			await interaction.reply({
 				embeds: [

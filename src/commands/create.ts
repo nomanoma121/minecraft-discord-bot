@@ -139,11 +139,11 @@ export const create = {
 				return;
 			}
 
-			const isNameAvailable = containers.some((container) => {
+			const isNameTaken = containers.some((container) => {
 				const labels = parseLabels(container.Labels);
 				return labels.name === server.name;
 			});
-			if (!isNameAvailable) {
+			if (!isNameTaken) {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(

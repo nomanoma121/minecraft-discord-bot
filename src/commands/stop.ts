@@ -5,7 +5,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
-import { docker, filterLabelBuilder } from "../lib/docker";
+import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { getAllServers, getServerByName } from "../utils";
 
@@ -51,7 +51,7 @@ export const stop = {
 			const containers = await docker.listContainers({
 				all: false,
 				filters: {
-					labels: filterLabelBuilder({ managed: true, name: serverName }),
+					label: filterLabelBuilder({ managed: true, name: serverName }),
 				},
 			});
 			const container = containers[0];
@@ -64,7 +64,7 @@ export const stop = {
 				return;
 			}
 
-			const server = await getServerByName(serverName);
+			const server = parseLabels(container.Labels);
 			const containerInstance = docker.getContainer(container.Id);
 
 			const isRunning = container.Status === "running";

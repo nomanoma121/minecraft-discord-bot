@@ -5,6 +5,7 @@ import {
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { getRunningServers } from "../utils";
+import { Config } from "../config";
 
 export const list = {
 	name: "list",
@@ -16,16 +17,16 @@ export const list = {
 		await interaction.reply("⌛ Fetching server list...");
 
 		try {
-			const container = await docker.listContainers({
-				all: false,
+			const containers = await docker.listContainers({
+				all: true,
 				filters: {
 					label: filterLabelBuilder({ managed: true }),
 				},
 			});
-			const servers = container.map((c) => parseLabels(c.Labels));
+			const servers = containers.map((c) => parseLabels(c.Labels));
 			const runningServers = await getRunningServers();
 
-			let message = `**Minecraft Servers (${servers.length}/${10}):**\n\n`;
+			let message = `**Minecraft Servers (${servers.length}/${Config.maxServerCount}):**\n\n`;
 
 			for (const server of servers) {
 				const isRunning = runningServers.some((s) => s.id === server.id);

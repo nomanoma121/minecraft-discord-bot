@@ -139,7 +139,7 @@ export const backupRestore = {
 
 				container
 					.putArchive(gunzip, {
-						path: "/data",
+						path: "/",
 					})
 					.then(() => resolve())
 					.catch(reject);

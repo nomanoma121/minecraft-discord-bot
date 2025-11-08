@@ -180,6 +180,7 @@ export const create = {
 					`VERSION=${server.version}`,
 					`GAMEMODE=${server.gamemode}`,
 					`DIFFICULTY=${server.difficulty}`,
+					`MAX_PLAYERS=${server.maxPlayers}`,
 					`TYPE=${server.type}`,
 				],
 				HostConfig: {

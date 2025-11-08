@@ -194,6 +194,7 @@ export const edit = {
 					`VERSION=${updatedServer.version}`,
 					`GAMEMODE=${updatedServer.gamemode}`,
 					`DIFFICULTY=${updatedServer.difficulty}`,
+					`MAX_PLAYERS=${updatedServer.maxPlayers}`,
 					`TYPE=${server.type}`, // type is not editable
 				],
 				HostConfig: {

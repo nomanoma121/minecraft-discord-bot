@@ -4,7 +4,13 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { DIFFICULTY, EMBED_COLORS, GAMEMODE, SERVER_TYPE } from "../constants";
+import {
+	DEFAULT_MAX_PLAYERS,
+	DIFFICULTY,
+	EMBED_COLORS,
+	GAMEMODE,
+	SERVER_TYPE,
+} from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
@@ -103,7 +109,9 @@ export const create = {
 			ownerId: interaction.user.id,
 			name: serverName,
 			version: version,
-			maxPlayers: Number(interaction.options.getString("max-players")),
+			maxPlayers:
+				Number(interaction.options.getString("max-players")) ||
+				DEFAULT_MAX_PLAYERS,
 			difficulty:
 				(interaction.options.getString("difficulty") as Difficulty) ||
 				DIFFICULTY.NORMAL,

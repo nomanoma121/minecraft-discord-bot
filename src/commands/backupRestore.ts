@@ -8,7 +8,12 @@ import {
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { formatDateForDisplay, formatTimestampForFilename, getAllServers, getServerByName } from "../utils";
+import {
+	formatDateForDisplay,
+	formatTimestampForFilename,
+	getAllServers,
+	getServerByName,
+} from "../utils";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";

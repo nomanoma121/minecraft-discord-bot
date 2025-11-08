@@ -14,8 +14,11 @@ import {
 } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { formatTimestampForFilename, getAllServers, getServerByName } from "../utils";
-import { parse } from "node:path";
+import {
+	formatTimestampForFilename,
+	getAllServers,
+	getServerByName,
+} from "../utils";
 
 export const backupCreate = {
 	name: "backup-create",

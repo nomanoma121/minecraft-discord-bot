@@ -2,10 +2,10 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
+import { Config } from "../config";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { getRunningServers } from "../utils";
-import { Config } from "../config";
 
 export const list = {
 	name: "list",

@@ -7,7 +7,7 @@ import {
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { getAllServers, getServerByName } from "../utils";
+import { getAllServers } from "../utils";
 
 export const stop = {
 	name: "stop",
@@ -67,7 +67,7 @@ export const stop = {
 			const server = parseLabels(container.Labels);
 			const containerInstance = docker.getContainer(container.Id);
 
-			const isRunning = container.Status === "running";
+			const isRunning = container.State === "running";
 			if (!isRunning) {
 				await interaction.editReply({
 					embeds: [

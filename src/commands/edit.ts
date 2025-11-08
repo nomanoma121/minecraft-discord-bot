@@ -180,7 +180,7 @@ export const edit = {
 			const containerInstance = docker.getContainer(container.Id);
 
 			await docker.createContainer({
-				name: updatedServer.id,
+				name: crypto.randomUUID(),
 				Image: container.Image,
 				Labels: labelBuilder({
 					managed: true,

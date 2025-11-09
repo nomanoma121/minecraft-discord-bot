@@ -15,8 +15,6 @@ FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
 COPY src src
 COPY scripts scripts
-COPY drizzle drizzle
-COPY drizzle.config.ts .
 COPY package.json .
 
 # run the app

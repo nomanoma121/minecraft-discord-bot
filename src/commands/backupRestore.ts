@@ -5,11 +5,16 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { queries as q } from "../db/queries";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { formatDateForDisplay, formatTimestampForFilename } from "../utils";
+import {
+	formatDateForDisplay,
+	formatTimestampForFilename,
+	getAllServers,
+	getServerByName,
+} from "../utils";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";
@@ -38,7 +43,7 @@ export const backupRestore = {
 		const focused = interaction.options.getFocused(true);
 		if (focused.name === SERVER_NAME_OPTION) {
 			const focusedValue = focused.value;
-			const servers = await q.getAllServers();
+			const servers = await getAllServers();
 			const filtered = servers.filter((server) =>
 				server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 			);
@@ -55,7 +60,7 @@ export const backupRestore = {
 				return;
 			}
 
-			const server = await q.getServerByName(serverName);
+			const server = await getServerByName(serverName);
 			if (!server) {
 				await interaction.respond([]);
 				return;
@@ -67,7 +72,7 @@ export const backupRestore = {
 				backup.toString().toLowerCase().startsWith(focusedValue.toLowerCase()),
 			);
 			await interaction.respond(
-				filtered.map((backup) => ({
+				filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((backup) => ({
 					name: formatDateForDisplay(backup),
 					value: backup.toString(),
 				})),
@@ -87,9 +92,19 @@ export const backupRestore = {
 			return;
 		}
 
-		const server = await q.getServerByName(serverName);
+		const server = await getServerByName(serverName);
 		if (!server) {
-			await interaction.reply(`No server found with the name "${serverName}".`);
+			await interaction.reply({
+				embeds: [
+					createErrorEmbed(`No server found with the name "${serverName}".`),
+				],
+			});
+			return;
+		}
+		if (server.ownerId !== interaction.user.id) {
+			await interaction.reply(
+				`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,
+			);
 			return;
 		}
 
@@ -135,7 +150,7 @@ export const backupRestore = {
 
 				container
 					.putArchive(gunzip, {
-						path: "/data",
+						path: "/",
 					})
 					.then(() => resolve())
 					.catch(reject);

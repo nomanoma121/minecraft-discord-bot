@@ -4,11 +4,21 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { DIFFICULTY, EMBED_COLORS, GAMEMODE, SERVER_TYPE } from "../constants";
-import { queries as q } from "../db/queries";
-import { docker } from "../lib/docker";
+import {
+	DEFAULT_MAX_PLAYERS,
+	DIFFICULTY,
+	EMBED_COLORS,
+	GAMEMODE,
+	SERVER_TYPE,
+} from "../constants";
+import {
+	docker,
+	filterLabelBuilder,
+	labelBuilder,
+	parseLabels,
+} from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import type { Difficulty, Gamemode, ServerType } from "../types/type";
+import type { Difficulty, Gamemode, ServerType } from "../types/server";
 
 export const create = {
 	name: "create",
@@ -68,7 +78,7 @@ export const create = {
 				.setChoices({ name: "paper", value: SERVER_TYPE.PAPER })
 				.setRequired(false),
 		)
-		.addStringOption((option) =>
+		.addIntegerOption((option) =>
 			option
 				.setName("max-players")
 				.setDescription("Maximum number of players (default: 20)")
@@ -94,54 +104,70 @@ export const create = {
 			return;
 		}
 
-		const serverConfig = {
+		const server = {
+			id: crypto.randomUUID(),
+			ownerId: interaction.user.id,
 			name: serverName,
 			version: version,
-			maxPlayers: 20,
-			difficulty: (interaction.options.getString("difficulty") ??
-				DIFFICULTY.NORMAL) as Difficulty,
-			type: (interaction.options.getString("server-type") ??
-				SERVER_TYPE.PAPER) as ServerType,
-			gamemode: (interaction.options.getString("gamemode") ??
-				GAMEMODE.SURVIVAL) as Gamemode,
-			description: interaction.options.getString("description") ?? "",
+			maxPlayers:
+				interaction.options.getString("max-players") ||
+				DEFAULT_MAX_PLAYERS.toString(),
+			difficulty:
+				(interaction.options.getString("difficulty") as Difficulty) ||
+				DIFFICULTY.NORMAL,
+			type:
+				(interaction.options.getString("server-type") as ServerType) ||
+				SERVER_TYPE.PAPER,
+			gamemode:
+				(interaction.options.getString("gamemode") as Gamemode) ||
+				GAMEMODE.SURVIVAL,
+			description:
+				interaction.options.getString("description") || "A Minecraft server",
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		};
 
-		const existingServerCount = await q.getCurrentServerCount();
-		if (existingServerCount >= Config.maxServerCount) {
-			await interaction.editReply({
-				embeds: [
-					createErrorEmbed(
-						"The maximum number of servers has been reached. Please try again later.",
-					),
-				],
-			});
-			return;
-		}
-		const isNameAvailable = await q.isServerNameAvailable(serverConfig.name);
-		if (!isNameAvailable) {
-			await interaction.editReply({
-				embeds: [
-					createErrorEmbed(
-						`The server name "${serverConfig.name}" is already taken. Please choose a different name.`,
-					),
-				],
-			});
-			return;
-		}
-
 		try {
-			const server = await q.createServer(interaction.user.id, {
-				name: serverConfig.name,
-				version: serverConfig.version,
-				maxPlayers: serverConfig.maxPlayers,
-				difficulty: serverConfig.difficulty,
-				type: serverConfig.type,
-				gamemode: serverConfig.gamemode,
-				description: serverConfig.description,
+			const containers = await docker.listContainers({
+				all: true,
+				filters: {
+					label: filterLabelBuilder({ managed: true }),
+				},
 			});
 
-			console.log("Minecraft server record created in the database:", server);
+			const existingServerCount = containers.length;
+			if (existingServerCount >= Config.maxServerCount) {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							"The maximum number of servers has been reached. Please try again later.",
+						),
+					],
+				});
+				return;
+			}
+
+			const isNameTaken = containers.some((container) => {
+				const labels = parseLabels(container.Labels);
+				return labels.name === server.name;
+			});
+			if (isNameTaken) {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							`The server name "${server.name}" is already taken. Please choose a different name.`,
+						),
+					],
+				});
+				return;
+			}
+
+			if (Number(server.maxPlayers) < 1 || Number(server.maxPlayers) > 100) {
+				await interaction.editReply({
+					embeds: [createErrorEmbed("Max players must be between 1 and 100.")],
+				});
+				return;
+			}
 
 			await docker.createVolume({
 				Name: server.id,
@@ -150,14 +176,19 @@ export const create = {
 			await docker.createContainer({
 				name: server.id,
 				Image: "itzg/minecraft-server",
+				Labels: labelBuilder({
+					managed: true,
+					...server,
+				}),
 				Env: [
 					"EULA=TRUE",
-					`SERVER_NAME=${serverConfig.name}`,
-					`MOTD=${serverConfig.description}`,
-					`VERSION=${serverConfig.version}`,
-					`GAMEMODE=${serverConfig.gamemode}`,
-					`DIFFICULTY=${serverConfig.difficulty}`,
-					`TYPE=${serverConfig.type}`,
+					`SERVER_NAME=${server.name}`,
+					`MOTD=${server.description}`,
+					`VERSION=${server.version}`,
+					`GAMEMODE=${server.gamemode}`,
+					`DIFFICULTY=${server.difficulty}`,
+					`MAX_PLAYERS=${server.maxPlayers}`,
+					`TYPE=${server.type}`,
 				],
 				HostConfig: {
 					PortBindings: {

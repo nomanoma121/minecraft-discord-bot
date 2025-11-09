@@ -3,10 +3,10 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { queries as q } from "../db/queries";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { createErrorEmbed } from "../lib/embed";
-import { formatDateForDisplay } from "../utils";
+import { formatDateForDisplay, getAllServers, getServerByName } from "../utils";
 
 export const backupList = {
 	name: "backup-list",
@@ -25,12 +25,12 @@ export const backupList = {
 		const focused = interaction.options.getFocused(true);
 		if (focused.name === "server-name") {
 			const focusedValue = focused.value;
-			const servers = await q.getAllServers();
+			const servers = await getAllServers();
 			const filtered = servers.filter((server) =>
 				server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 			);
 			await interaction.respond(
-				filtered.map((server) => ({
+				filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
 					name: server.name,
 					value: server.name,
 				})),
@@ -47,7 +47,7 @@ export const backupList = {
 			return;
 		}
 
-		const server = await q.getServerByName(serverName);
+		const server = await getServerByName(serverName);
 		if (!server) {
 			await interaction.reply(`No server found with the name "${serverName}".`);
 			return;

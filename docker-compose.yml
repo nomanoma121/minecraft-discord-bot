@@ -8,8 +8,6 @@ services:
       - CLIENT_ID=${CLIENT_ID}
       - GUILD_ID=${GUILD_ID}
     volumes:
-      # Database persistence using named volume
-      - bot-data:/data
       # Docker socket for managing Minecraft server containers
       - /var/run/docker.sock:/var/run/docker.sock
       - ./backups:/backups

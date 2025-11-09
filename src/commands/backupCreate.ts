@@ -1,5 +1,6 @@
 import { createWriteStream } from "node:fs";
 import { mkdir } from "node:fs/promises";
+import { pipeline } from "node:stream/promises";
 import { createGzip } from "node:zlib";
 import {
 	type AutocompleteInteraction,
@@ -7,7 +8,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { queries as q } from "../db/queries";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import {
 	getExistingBackups,
 	getTotalBackupCounts,
@@ -15,7 +16,11 @@ import {
 } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { formatTimestampForFilename } from "../utils";
+import {
+	formatTimestampForFilename,
+	getAllServers,
+	getServerByName,
+} from "../utils";
 
 export const backupCreate = {
 	name: "backup-create",
@@ -32,12 +37,12 @@ export const backupCreate = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
-		const servers = await q.getAllServers();
+		const servers = await getAllServers();
 		const filtered = servers.filter((server) =>
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
 		await interaction.respond(
-			filtered.map((server) => ({
+			filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
 				name: server.name,
 				value: server.name,
 			})),
@@ -53,7 +58,7 @@ export const backupCreate = {
 			return;
 		}
 
-		const server = await q.getServerByName(serverName);
+		const server = await getServerByName(serverName);
 		if (!server) {
 			await interaction.reply({
 				embeds: [
@@ -102,15 +107,10 @@ export const backupCreate = {
 				const archive = await container.getArchive({
 					path: "/data",
 				});
-				await new Promise<void>((resolve, reject) => {
-					const gzip = createGzip();
-					const writeStream = createWriteStream(backupFilePath);
+				const gzip = createGzip();
+				const writeStream = createWriteStream(backupFilePath);
 
-					archive.pipe(gzip).pipe(writeStream);
-
-					writeStream.on("finish", () => resolve());
-					writeStream.on("error", (err) => reject(err));
-				});
+				await pipeline(archive, gzip, writeStream);
 			});
 
 			await interaction.editReply(

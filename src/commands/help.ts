@@ -55,6 +55,28 @@ export const help = {
 					inline: false,
 				},
 				{
+					name: "/edit",
+					value:
+						"Edits server settings like description, max players, gamemode, difficulty, and version (owner only)",
+					inline: false,
+				},
+				{
+					name: "/backup-create",
+					value: "Creates a backup of a Minecraft server's world data",
+					inline: false,
+				},
+				{
+					name: "/backup-list",
+					value: "Lists all available backups for a specific server",
+					inline: false,
+				},
+				{
+					name: "/backup-restore",
+					value:
+						"Restores a server from a backup (owner only, server must be stopped)",
+					inline: false,
+				},
+				{
 					name: "/help",
 					value: "Shows this help message with all available commands",
 					inline: false,

@@ -23,10 +23,7 @@ export const withSafeSave = async (
 	const saveoffStream = await saveoff.start({});
 	docker.modem.demuxStream(saveoffStream, process.stdout, process.stderr);
 	saveoffStream.resume();
-	await new Promise((resolve, reject) => {
-		saveoffStream.on("end", resolve);
-		saveoffStream.on("error", reject);
-	});
+	await finished(saveoffStream);
 
 	const saveall = await container.exec({
 		Cmd: ["rcon-cli", "save-all"],
@@ -49,10 +46,7 @@ export const withSafeSave = async (
 		const saveonStream = await saveon.start({});
 		docker.modem.demuxStream(saveonStream, process.stdout, process.stderr);
 		saveonStream.resume();
-		await new Promise((resolve, reject) => {
-			saveonStream.on("end", resolve);
-			saveonStream.on("error", reject);
-		});
+		await finished(saveonStream);
 	}
 };
 
@@ -80,6 +74,9 @@ export const getTotalBackupCounts = async (): Promise<number> => {
 		let totalCount = 0;
 		for (const serverId of serverDirs) {
 			const serverBackupDir = `${backupsRootDir}/${serverId}`;
+			const stat = await fs.promises.stat(serverBackupDir);
+			if (!stat.isDirectory()) continue;
+
 			const files = await fs.promises.readdir(serverBackupDir);
 			const backupFiles = files.filter((file) => file.endsWith(".tar.gz"));
 			totalCount += backupFiles.length;

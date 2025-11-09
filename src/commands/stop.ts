@@ -4,11 +4,10 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import type Dockerode from "dockerode";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
-import { queries as q } from "../db/queries";
-import { docker } from "../lib/docker";
+import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { getAllServers } from "../utils";
 
 export const stop = {
 	name: "stop",
@@ -25,7 +24,7 @@ export const stop = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
-		const servers = await q.getAllServers();
+		const servers = await getAllServers();
 		const filtered = servers.filter((server) =>
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
@@ -49,8 +48,14 @@ export const stop = {
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		try {
-			const server = await q.getServerByName(serverName);
-			if (!server) {
+			const containers = await docker.listContainers({
+				all: false,
+				filters: {
+					label: filterLabelBuilder({ managed: true, name: serverName }),
+				},
+			});
+			const container = containers[0];
+			if (!container) {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(`No server found with the name "${serverName}".`),
@@ -59,24 +64,10 @@ export const stop = {
 				return;
 			}
 
-			const container = docker.getContainer(server.id);
-			let containerInfo: Dockerode.ContainerInspectInfo;
+			const server = parseLabels(container.Labels);
+			const containerInstance = docker.getContainer(container.Id);
 
-			try {
-				containerInfo = await container.inspect();
-			} catch (error) {
-				await interaction.editReply({
-					embeds: [
-						createErrorEmbed(
-							`Server "${serverName}" not found. The server may have been deleted.`,
-						),
-					],
-				});
-				console.error("Error inspecting container:", error);
-				return;
-			}
-
-			const isRunning = containerInfo.State.Running;
+			const isRunning = container.State === "running";
 			if (!isRunning) {
 				await interaction.editReply({
 					embeds: [
@@ -90,7 +81,7 @@ export const stop = {
 				`✅ Check server "${serverName}"\n⌛ Stopping Minecraft Server...`,
 			);
 
-			await container.stop();
+			await containerInstance.stop();
 			console.log(`Minecraft server "${serverName}" stopped.`);
 
 			await interaction.editReply(

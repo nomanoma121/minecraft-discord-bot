@@ -1,3 +1,4 @@
+import { rm } from "node:fs/promises";
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
@@ -5,9 +6,9 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
-import { queries as q } from "../db/queries";
-import { docker } from "../lib/docker";
+import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { getAllServers } from "../utils";
 
 const deleteCommand = {
 	name: "delete",
@@ -24,7 +25,7 @@ const deleteCommand = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
-		const servers = await q.getAllServers();
+		const servers = await getAllServers();
 		const filtered = servers.filter((server) =>
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
@@ -48,8 +49,14 @@ const deleteCommand = {
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		try {
-			const server = await q.getServerByName(serverName);
-			if (!server) {
+			const containers = await docker.listContainers({
+				all: true,
+				filters: {
+					label: filterLabelBuilder({ managed: true, name: serverName }),
+				},
+			});
+			const container = containers[0];
+			if (!container) {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(`No server found with the name "${serverName}".`),
@@ -58,6 +65,7 @@ const deleteCommand = {
 				return;
 			}
 
+			const server = parseLabels(container.Labels);
 			if (server.ownerId !== interaction.user.id) {
 				await interaction.editReply({
 					embeds: [
@@ -69,40 +77,25 @@ const deleteCommand = {
 				return;
 			}
 
+			if (container.State === "running") {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							`Server "${serverName}" is currently running. Please stop the server before deleting it.`,
+						),
+					],
+				});
+				return;
+			}
+
 			await interaction.editReply(
 				`✅ Check server "${serverName}"\n⌛ Removing server...`,
 			);
 
-			const container = docker.getContainer(server.id);
+			const containerInstance = docker.getContainer(container.Id);
 
-			try {
-				const containerInfo = await container.inspect();
-
-				if (containerInfo.State.Running) {
-					await container.stop();
-					console.log(`Stopped container "${serverName}" before deletion.`);
-				}
-
-				await container.remove();
-				console.log(`Removed Docker container "${serverName}".`);
-			} catch (_error) {
-				console.log(
-					`Container "${serverName}" not found, continuing with cleanup.`,
-				);
-			}
-
-			try {
-				const volume = docker.getVolume(server.id);
-				await volume.remove();
-				console.log(`Removed volume "${server.id}".`);
-			} catch (_error) {
-				console.log(
-					`Volume "${server.id}" not found, continuing with cleanup.`,
-				);
-			}
-
-			await q.deleteServer(serverName);
-			console.log(`Deleted server "${serverName}" from database.`);
+			await containerInstance.remove({ v: true });
+			await rm(`/backups/${server.id}`, { recursive: true, force: true });
 
 			await interaction.editReply(
 				`✅ Check server "${serverName}"\n✅ Remove server\n\n`,

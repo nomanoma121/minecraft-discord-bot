@@ -8,13 +8,9 @@ import {
 	GatewayIntentBits,
 	MessageFlags,
 } from "discord.js";
-import { migrate } from "drizzle-orm/bun-sqlite/migrator";
-import { db } from "./lib/db";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-migrate(db, { migrationsFolder: "./drizzle" });
 
 const client = new Client({
 	intents: [

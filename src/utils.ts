@@ -47,33 +47,19 @@ export const getAllServers = async () => {
 	return servers;
 };
 
-export const getServerById = async (id: string): Promise<Server> => {
-	const containers = await docker.listContainers({
-		all: true,
-		filters: {
-			label: filterLabelBuilder({ id, managed: true }),
-		},
-	});
-	if (!containers[0]?.Labels)
-		throw new Error(`Server with ID "${id}" not found.`);
-	const server = parseLabels(containers[0].Labels);
-	return server;
-};
-
-export const getServerByName = async (name: string): Promise<Server> => {
+export const getServerByName = async (name: string): Promise<Server | null> => {
 	const containers = await docker.listContainers({
 		all: true,
 		filters: {
 			label: filterLabelBuilder({ name, managed: true }),
 		},
 	});
-	if (!containers[0]?.Labels)
-		throw new Error(`Server with name "${name}" not found.`);
+	if (!containers[0]?.Labels) return null;
 	const server = parseLabels(containers[0].Labels);
 	return server;
 };
 
-export const getRunningServers = async () => {
+export const getRunningServers = async (): Promise<Server[]> => {
 	const containers = await docker.listContainers({
 		all: false,
 		filters: {

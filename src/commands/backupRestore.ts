@@ -94,10 +94,13 @@ export const backupRestore = {
 
 		const server = await getServerByName(serverName);
 		if (!server) {
-			await interaction.reply(`No server found with the name "${serverName}".`);
+			await interaction.reply({
+				embeds: [
+					createErrorEmbed(`No server found with the name "${serverName}".`),
+				],
+			});
 			return;
 		}
-
 		if (server.ownerId !== interaction.user.id) {
 			await interaction.reply(
 				`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,

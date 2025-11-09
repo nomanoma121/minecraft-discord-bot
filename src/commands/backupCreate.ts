@@ -20,6 +20,7 @@ import {
 	getServerByName,
 } from "../utils";
 import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import { finished, pipeline } from "node:stream/promises";
 
 export const backupCreate = {
 	name: "backup-create",
@@ -106,15 +107,10 @@ export const backupCreate = {
 				const archive = await container.getArchive({
 					path: "/data",
 				});
-				await new Promise<void>((resolve, reject) => {
-					const gzip = createGzip();
-					const writeStream = createWriteStream(backupFilePath);
+				const gzip = createGzip();
+				const writeStream = createWriteStream(backupFilePath);
 
-					archive.pipe(gzip).pipe(writeStream);
-
-					writeStream.on("finish", () => resolve());
-					writeStream.on("error", (err) => reject(err));
-				});
+				await pipeline(archive, gzip, writeStream);
 			});
 
 			await interaction.editReply(

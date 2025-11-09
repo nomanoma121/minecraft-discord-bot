@@ -6,6 +6,7 @@ import {
 import { getExistingBackups } from "../lib/backup";
 import { createErrorEmbed } from "../lib/embed";
 import { formatDateForDisplay, getAllServers, getServerByName } from "../utils";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 
 export const backupList = {
 	name: "backup-list",
@@ -29,7 +30,7 @@ export const backupList = {
 				server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 			);
 			await interaction.respond(
-				filtered.map((server) => ({
+				filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
 					name: server.name,
 					value: server.name,
 				})),

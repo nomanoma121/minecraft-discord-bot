@@ -19,6 +19,7 @@ import {
 	getAllServers,
 	getServerByName,
 } from "../utils";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 
 export const backupCreate = {
 	name: "backup-create",
@@ -40,7 +41,7 @@ export const backupCreate = {
 			server.name.toLowerCase().startsWith(focusedValue.toLowerCase()),
 		);
 		await interaction.respond(
-			filtered.map((server) => ({
+			filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
 				name: server.name,
 				value: server.name,
 			})),

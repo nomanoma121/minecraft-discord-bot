@@ -14,6 +14,7 @@ import {
 	getAllServers,
 	getServerByName,
 } from "../utils";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";
@@ -71,7 +72,7 @@ export const backupRestore = {
 				backup.toString().toLowerCase().startsWith(focusedValue.toLowerCase()),
 			);
 			await interaction.respond(
-				filtered.map((backup) => ({
+				filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((backup) => ({
 					name: formatDateForDisplay(backup),
 					value: backup.toString(),
 				})),

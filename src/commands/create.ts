@@ -109,9 +109,7 @@ export const create = {
 			ownerId: interaction.user.id,
 			name: serverName,
 			version: version,
-			maxPlayers:
-				Number(interaction.options.getString("max-players")) ||
-				DEFAULT_MAX_PLAYERS,
+			maxPlayers: interaction.options.getString("max-players") || DEFAULT_MAX_PLAYERS.toString(),
 			difficulty:
 				(interaction.options.getString("difficulty") as Difficulty) ||
 				DIFFICULTY.NORMAL,
@@ -157,6 +155,15 @@ export const create = {
 						createErrorEmbed(
 							`The server name "${server.name}" is already taken. Please choose a different name.`,
 						),
+					],
+				});
+				return;
+			}
+
+			if (Number(server.maxPlayers) < 1 || Number(server.maxPlayers) > 100) {
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed("Max players must be between 1 and 100."),
 					],
 				});
 				return;

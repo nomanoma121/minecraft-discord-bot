@@ -72,7 +72,7 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 		ownerId: getValue("ownerId"),
 		name: getValue("name"),
 		version: getValue("version"),
-		maxPlayers: Number(getValue("maxPlayers")),
+		maxPlayers: getValue("maxPlayers"),
 		difficulty: getValue("difficulty") as Difficulty,
 		type: getValue("type") as ServerType,
 		gamemode: getValue("gamemode") as Gamemode,

@@ -123,6 +123,16 @@ export const edit = {
 			return;
 		}
 
+		if (maxPlayers && (maxPlayers < 1 || maxPlayers > 100)) {
+			await interaction.reply({
+				embeds: [
+					createErrorEmbed("Max players must be between 1 and 100."),
+				],
+				ephemeral: true,
+			});
+			return;
+		}
+
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		try {
@@ -172,7 +182,7 @@ export const edit = {
 			const updatedServer: Server = { ...server, updatedAt: new Date() };
 
 			if (description) updatedServer.description = description;
-			if (maxPlayers) updatedServer.maxPlayers = maxPlayers;
+			if (maxPlayers) updatedServer.maxPlayers = String(maxPlayers);
 			if (gamemode) updatedServer.gamemode = gamemode;
 			if (difficulty) updatedServer.difficulty = difficulty;
 			if (version) updatedServer.version = version;

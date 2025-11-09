@@ -15,7 +15,7 @@ export type Server = {
 	ownerId: string;
 	name: string;
 	version: string;
-	maxPlayers: number;
+	maxPlayers: string;
 	difficulty: Difficulty;
 	type: ServerType;
 	gamemode: Gamemode;

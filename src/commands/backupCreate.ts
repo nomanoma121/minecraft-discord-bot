@@ -16,6 +16,7 @@ import {
 } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import {
 	formatTimestampForFilename,
 	getAllServers,
@@ -86,6 +87,8 @@ export const backupCreate = {
 
 		await interaction.reply(`⌛ Creating backup for server "${serverName}"...`);
 
+		const release = await mutex.acquire();
+
 		try {
 			const container = docker.getContainer(server.id);
 			const containerInfo = await container.inspect();
@@ -126,6 +129,8 @@ export const backupCreate = {
 				],
 			});
 			return;
+		} finally {
+			release();
 		}
 	},
 };

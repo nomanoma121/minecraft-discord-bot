@@ -9,6 +9,7 @@ import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import {
 	formatDateForDisplay,
 	formatTimestampForFilename,
@@ -123,6 +124,8 @@ export const backupRestore = {
 			`⌛ Restoring backup for server "${serverName}"...`,
 		);
 
+		const release = await mutex.acquire();
+
 		try {
 			const container = docker.getContainer(server.id);
 			const containerInfo = await container.inspect();
@@ -170,6 +173,8 @@ export const backupRestore = {
 					),
 				],
 			});
+		} finally {
+			release();
 		}
 	},
 };

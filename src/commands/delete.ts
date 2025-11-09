@@ -8,6 +8,7 @@ import {
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
 const deleteCommand = {
@@ -47,6 +48,8 @@ const deleteCommand = {
 		}
 
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
+
+		const release = await mutex.acquire();
 
 		try {
 			const containers = await docker.listContainers({
@@ -124,6 +127,8 @@ const deleteCommand = {
 					),
 				],
 			});
+		} finally {
+			release();
 		}
 	},
 };

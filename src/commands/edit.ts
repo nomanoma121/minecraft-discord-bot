@@ -18,6 +18,7 @@ import {
 	parseLabels,
 } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
 import { getAllServers } from "../utils";
 
@@ -132,6 +133,8 @@ export const edit = {
 		}
 
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
+
+		const release = await mutex.acquire();
 
 		try {
 			const containers = await docker.listContainers({
@@ -260,6 +263,8 @@ export const edit = {
 					),
 				],
 			});
+		} finally {
+			release();
 		}
 	},
 };

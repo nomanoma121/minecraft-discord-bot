@@ -30,5 +30,6 @@ export const EMBED_COLORS = {
 
 export const DEFAULT_MAX_PLAYERS = 20;
 
-// Discord API limits
 export const AUTOCOMPLETE_MAX_CHOICES = 25;
+
+export const COMMAND_TIMEOUT_MS = 1 * 60 * 1000;

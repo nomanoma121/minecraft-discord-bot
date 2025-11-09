@@ -18,6 +18,7 @@ import {
 	parseLabels,
 } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, ServerType } from "../types/server";
 
 export const create = {
@@ -127,6 +128,8 @@ export const create = {
 			updatedAt: new Date(),
 		};
 
+		const release = await mutex.acquire();
+
 		try {
 			const containers = await docker.listContainers({
 				all: true,
@@ -234,6 +237,8 @@ export const create = {
 					),
 				],
 			});
+		} finally {
+			release();
 		}
 	},
 };

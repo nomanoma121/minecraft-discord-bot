@@ -11,6 +11,7 @@ import {
 } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import { getAllServers, getRunningServers } from "../utils";
 
 const HEALTH_INTERVAL = 5000;
@@ -53,6 +54,8 @@ export const start = {
 		}
 
 		await interaction.reply(`⌛ Checking server "${serverName}"...`);
+
+		const release = await mutex.acquire();
 
 		try {
 			const containers = await docker.listContainers({
@@ -167,6 +170,8 @@ export const start = {
 					),
 				],
 			});
+		} finally {
+			release();
 		}
 	},
 };

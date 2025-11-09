@@ -178,9 +178,10 @@ export const edit = {
 			if (version) updatedServer.version = version;
 
 			const containerInstance = docker.getContainer(container.Id);
+			await containerInstance.remove({ v: false });
 
 			await docker.createContainer({
-				name: crypto.randomUUID(),
+				name: updatedServer.id,
 				Image: container.Image,
 				Labels: labelBuilder({
 					managed: true,
@@ -207,8 +208,6 @@ export const edit = {
 					[`${Config.port}/tcp`]: {},
 				},
 			});
-
-			await containerInstance.remove({ v: false });
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Server "${serverName}" Updated`)

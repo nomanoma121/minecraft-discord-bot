@@ -5,6 +5,7 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
@@ -14,7 +15,6 @@ import {
 	getAllServers,
 	getServerByName,
 } from "../utils";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";

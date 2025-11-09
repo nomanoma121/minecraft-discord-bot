@@ -62,14 +62,12 @@ export const help = {
 				},
 				{
 					name: "/backup-create",
-					value:
-						"Creates a backup of a Minecraft server's world data",
+					value: "Creates a backup of a Minecraft server's world data",
 					inline: false,
 				},
 				{
 					name: "/backup-list",
-					value:
-						"Lists all available backups for a specific server",
+					value: "Lists all available backups for a specific server",
 					inline: false,
 				},
 				{

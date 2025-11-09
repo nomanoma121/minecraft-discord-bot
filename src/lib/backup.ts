@@ -76,7 +76,7 @@ export const getTotalBackupCounts = async (): Promise<number> => {
 			const serverBackupDir = `${backupsRootDir}/${serverId}`;
 			const stat = await fs.promises.stat(serverBackupDir);
 			if (!stat.isDirectory()) continue;
-			
+
 			const files = await fs.promises.readdir(serverBackupDir);
 			const backupFiles = files.filter((file) => file.endsWith(".tar.gz"));
 			totalCount += backupFiles.length;

@@ -1,5 +1,6 @@
 import { createWriteStream } from "node:fs";
 import { mkdir } from "node:fs/promises";
+import { pipeline } from "node:stream/promises";
 import { createGzip } from "node:zlib";
 import {
 	type AutocompleteInteraction,
@@ -7,6 +8,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import {
 	getExistingBackups,
 	getTotalBackupCounts,
@@ -19,8 +21,6 @@ import {
 	getAllServers,
 	getServerByName,
 } from "../utils";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
-import { finished, pipeline } from "node:stream/promises";
 
 export const backupCreate = {
 	name: "backup-create",

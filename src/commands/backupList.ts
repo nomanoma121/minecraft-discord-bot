@@ -3,10 +3,10 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { createErrorEmbed } from "../lib/embed";
 import { formatDateForDisplay, getAllServers, getServerByName } from "../utils";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 
 export const backupList = {
 	name: "backup-list",

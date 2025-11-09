@@ -46,10 +46,12 @@ export const filterLabelBuilder = (opts: Labels): string[] => {
 
 export const labelBuilder = (opts: Labels): Record<string, string> => {
 	return Object.fromEntries(
-		Object.entries(opts).map(([key, value]) => [
-			`${DOCKER_LABEL_PREFIX}.${key}`,
-			value instanceof Date ? value.toISOString() : String(value),
-		]),
+		Object.entries(opts)
+			.filter(([, value]) => value !== undefined)
+			.map(([key, value]) => [
+				`${DOCKER_LABEL_PREFIX}.${key}`,
+				value instanceof Date ? value.toISOString() : String(value),
+			]),
 	);
 };
 

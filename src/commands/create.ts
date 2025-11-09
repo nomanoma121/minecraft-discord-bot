@@ -78,7 +78,7 @@ export const create = {
 				.setChoices({ name: "paper", value: SERVER_TYPE.PAPER })
 				.setRequired(false),
 		)
-		.addStringOption((option) =>
+		.addIntegerOption((option) =>
 			option
 				.setName("max-players")
 				.setDescription("Maximum number of players (default: 20)")

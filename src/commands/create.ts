@@ -109,7 +109,9 @@ export const create = {
 			ownerId: interaction.user.id,
 			name: serverName,
 			version: version,
-			maxPlayers: interaction.options.getString("max-players") || DEFAULT_MAX_PLAYERS.toString(),
+			maxPlayers:
+				interaction.options.getString("max-players") ||
+				DEFAULT_MAX_PLAYERS.toString(),
 			difficulty:
 				(interaction.options.getString("difficulty") as Difficulty) ||
 				DIFFICULTY.NORMAL,
@@ -162,9 +164,7 @@ export const create = {
 
 			if (Number(server.maxPlayers) < 1 || Number(server.maxPlayers) > 100) {
 				await interaction.editReply({
-					embeds: [
-						createErrorEmbed("Max players must be between 1 and 100."),
-					],
+					embeds: [createErrorEmbed("Max players must be between 1 and 100.")],
 				});
 				return;
 			}

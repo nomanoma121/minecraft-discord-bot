@@ -125,9 +125,7 @@ export const edit = {
 
 		if (maxPlayers && (maxPlayers < 1 || maxPlayers > 100)) {
 			await interaction.reply({
-				embeds: [
-					createErrorEmbed("Max players must be between 1 and 100."),
-				],
+				embeds: [createErrorEmbed("Max players must be between 1 and 100.")],
 				ephemeral: true,
 			});
 			return;

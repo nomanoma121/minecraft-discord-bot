@@ -128,7 +128,6 @@ export const backupCreate = {
 					),
 				],
 			});
-			return;
 		} finally {
 			release();
 		}

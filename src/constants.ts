@@ -32,4 +32,4 @@ export const DEFAULT_MAX_PLAYERS = 20;
 
 export const AUTOCOMPLETE_MAX_CHOICES = 25;
 
-export const COMMAND_TIMEOUT_MS = 1 * 60 * 1000;
+export const COMMAND_TIMEOUT_MS = 6 * 60 * 1000;

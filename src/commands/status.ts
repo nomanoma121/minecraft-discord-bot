@@ -6,7 +6,7 @@ import {
 import type Dockerode from "dockerode";
 import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { docker } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
 import { getAllServers, getServerByName } from "../utils";
 import { createServerInfoEmbed } from "../lib/embed";
 
@@ -43,7 +43,7 @@ export const status = {
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -55,7 +55,7 @@ export const status = {
 			if (!server) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name "${serverName}".`),
 					],
 				});
 				return;

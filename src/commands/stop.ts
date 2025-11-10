@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed, createSuccessEmbed } from "../lib/embed";
+import { createErrorEmbed, createSuccessEmbed, createInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -43,7 +43,7 @@ export const stop = {
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -61,7 +61,7 @@ export const stop = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name "${serverName}".`),
 					],
 				});
 				return;
@@ -73,7 +73,7 @@ export const stop = {
 			if (!isRunning) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`Server "${serverName}" is already stopped.`),
+						createInfoEmbed(`Server "${serverName}" is already stopped.`),
 					],
 				});
 				return;

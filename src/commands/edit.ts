@@ -17,11 +17,10 @@ import {
 	labelBuilder,
 	parseLabels,
 } from "../lib/docker";
-import { createErrorEmbed, createServerInfoEmbed } from "../lib/embed";
+import { createErrorEmbed, createServerInfoEmbed, createInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
 import { getAllServers } from "../utils";
-import { create } from "./create";
 
 export const edit = {
 	name: "edit",
@@ -100,7 +99,7 @@ export const edit = {
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -118,7 +117,7 @@ export const edit = {
 		if (!description && !maxPlayers && !gamemode && !difficulty && !version) {
 			await interaction.reply({
 				embeds: [
-					createErrorEmbed(
+					createInfoEmbed(
 						"Please provide at least one field to update (description, max-players, gamemode, or difficulty).",
 					),
 				],
@@ -129,7 +128,7 @@ export const edit = {
 
 		if (maxPlayers && (maxPlayers < 1 || maxPlayers > 100)) {
 			await interaction.reply({
-				embeds: [createErrorEmbed("Max players must be between 1 and 100.")],
+				embeds: [createInfoEmbed("Max players must be between 1 and 100.")],
 				ephemeral: true,
 			});
 			return;
@@ -148,7 +147,7 @@ export const edit = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name "${serverName}".`),
 					],
 				});
 				return;
@@ -158,7 +157,7 @@ export const edit = {
 			if (server.ownerId !== interaction.user.id) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							"You don't have permission to edit this server. Only the owner can edit it.",
 						),
 					],
@@ -169,7 +168,7 @@ export const edit = {
 			if (container.State === "running") {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							`Server "${serverName}" is currently running. Please stop the server before editing its configuration.`,
 						),
 					],

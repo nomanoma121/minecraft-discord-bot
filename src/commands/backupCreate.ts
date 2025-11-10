@@ -15,7 +15,7 @@ import {
 	withSafeSave,
 } from "../lib/backup";
 import { docker } from "../lib/docker";
-import { createErrorEmbed, createSuccessEmbed } from "../lib/embed";
+import { createErrorEmbed, createSuccessEmbed, createInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import {
 	formatDateForDisplay,
@@ -57,7 +57,7 @@ export const backupCreate = {
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -66,7 +66,7 @@ export const backupCreate = {
 		if (!server) {
 			await interaction.reply({
 				embeds: [
-					createErrorEmbed(`No server found with the name "${serverName}".`),
+					createInfoEmbed(`No server found with the name "${serverName}".`),
 				],
 			});
 			return;
@@ -80,7 +80,7 @@ export const backupCreate = {
 		) {
 			await interaction.reply({
 				embeds: [
-					createErrorEmbed(
+					createInfoEmbed(
 						`Backup limit reached. Max total backups: ${Config.maxTotalBackupCount}, Max backups per server: ${Config.maxBackupCountPerServer}. Please delete old backups before creating new ones.`,
 					),
 				],
@@ -96,7 +96,7 @@ export const backupCreate = {
 
 			if (!containerInfo.State.Running) {
 				await interaction.editReply({
-					embeds: [createErrorEmbed(`Server "${serverName}" is not running.`)],
+					embeds: [createInfoEmbed(`Server "${serverName}" is not running.`)],
 				});
 				return;
 			}

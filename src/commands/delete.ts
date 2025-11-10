@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed, createSuccessEmbed } from "../lib/embed";
+import { createErrorEmbed, createSuccessEmbed, createInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -44,7 +44,7 @@ const deleteCommand = {
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -64,7 +64,7 @@ const deleteCommand = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name "${serverName}".`),
 					],
 				});
 				return;
@@ -74,7 +74,7 @@ const deleteCommand = {
 			if (server.ownerId !== interaction.user.id) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							`You are not the owner of server "${serverName}". Only the owner can delete this server.`,
 						),
 					],
@@ -85,7 +85,7 @@ const deleteCommand = {
 			if (container.State === "running") {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							`Server "${serverName}" is currently running. Please stop the server before deleting it.`,
 						),
 					],

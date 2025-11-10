@@ -89,7 +89,7 @@ export const backupRestore = {
 		if (!serverName || !backupTimestamp) {
 			await interaction.reply({
 				embeds: [
-					createErrorEmbed("Server name and backup timestamp are required."),
+					createInfoEmbed("Server name and backup timestamp are required."),
 				],
 			});
 			return;
@@ -99,15 +99,17 @@ export const backupRestore = {
 		if (!server) {
 			await interaction.reply({
 				embeds: [
-					createErrorEmbed(`No server found with the name "${serverName}".`),
+					createInfoEmbed(`No server found with the name "${serverName}".`),
 				],
 			});
 			return;
 		}
 		if (server.ownerId !== interaction.user.id) {
-			await interaction.reply(
-				`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,
-			);
+			await interaction.reply({
+				embeds: [
+					createInfoEmbed(`You are not the owner of server "${serverName}". Only the owner can restore a backup.`),
+				],
+			});
 			return;
 		}
 
@@ -116,9 +118,11 @@ export const backupRestore = {
 			(backup) => backup.toString() === backupTimestamp,
 		);
 		if (!backupToRestore) {
-			await interaction.reply(
-				`No backup found with the timestamp "${backupTimestamp}" for server "${serverName}".`,
-			);
+			await interaction.reply({
+				embeds: [
+					createInfoEmbed(`No backup found with the timestamp "${backupTimestamp}" for server "${serverName}".`),
+				],
+			});
 			return;
 		}
 
@@ -131,7 +135,7 @@ export const backupRestore = {
 			if (containerInfo.State.Running) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							`Server "${serverName}" must be stopped to restore a backup.`,
 						),
 					],

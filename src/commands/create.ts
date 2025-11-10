@@ -17,7 +17,7 @@ import {
 	labelBuilder,
 	parseLabels,
 } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, ServerType } from "../types/server";
 import { createServerInfoEmbed } from "../lib/embed";
@@ -93,7 +93,7 @@ export const create = {
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.editReply({
-				embeds: [createErrorEmbed("Server name is required.")],
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -101,7 +101,7 @@ export const create = {
 		const version = interaction.options.getString("version");
 		if (!version) {
 			await interaction.editReply({
-				embeds: [createErrorEmbed("Minecraft version is required.")],
+				embeds: [createInfoEmbed("Minecraft version is required.")],
 			});
 			return;
 		}
@@ -143,7 +143,7 @@ export const create = {
 			if (existingServerCount >= Config.maxServerCount) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							"The maximum number of servers has been reached. Please try again later.",
 						),
 					],
@@ -158,7 +158,7 @@ export const create = {
 			if (isNameTaken) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							`The server name "${server.name}" is already taken. Please choose a different name.`,
 						),
 					],
@@ -168,7 +168,7 @@ export const create = {
 
 			if (Number(server.maxPlayers) < 1 || Number(server.maxPlayers) > 100) {
 				await interaction.editReply({
-					embeds: [createErrorEmbed("Max players must be between 1 and 100.")],
+					embeds: [createInfoEmbed("Max players must be between 1 and 100.")],
 				});
 				return;
 			}

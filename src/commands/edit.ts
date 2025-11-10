@@ -6,17 +6,13 @@ import {
 } from "discord.js";
 import sharp from "sharp";
 import { Config } from "../config";
-import {
-	AUTOCOMPLETE_MAX_CHOICES,
-	DIFFICULTY,
-	GAMEMODE,
-	SERVER_DEFAULT_ICON_URL,
-} from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE } from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
 	labelBuilder,
 	parseLabels,
+	serverEnvBuilder,
 } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -240,17 +236,7 @@ export const edit = {
 					...server,
 					...updatedServer,
 				}),
-				Env: [
-					"EULA=TRUE",
-					`SERVER_NAME=${updatedServer.name}`,
-					`MOTD=${updatedServer.description}`,
-					`VERSION=${updatedServer.version}`,
-					`GAMEMODE=${updatedServer.gamemode}`,
-					`DIFFICULTY=${updatedServer.difficulty}`,
-					`MAX_PLAYERS=${updatedServer.maxPlayers}`,
-					`ICON=${updatedServer.iconPath || SERVER_DEFAULT_ICON_URL}`,
-					`TYPE=${server.type}`, // type is not editable
-				],
+				Env: serverEnvBuilder(updatedServer),
 				HostConfig: {
 					PortBindings: {
 						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],

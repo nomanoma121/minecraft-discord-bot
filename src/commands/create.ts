@@ -9,7 +9,7 @@ import {
 	DEFAULT_MAX_PLAYERS,
 	DIFFICULTY,
 	GAMEMODE,
-	SERVER_DEFAULT_ICON_URL,
+	MINECRAFT_SERVER_IMAGE,
 	SERVER_TYPE,
 } from "../constants";
 import {
@@ -17,6 +17,7 @@ import {
 	filterLabelBuilder,
 	labelBuilder,
 	parseLabels,
+	serverEnvBuilder,
 } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -225,22 +226,12 @@ export const create = {
 
 			await docker.createContainer({
 				name: server.id,
-				Image: "itzg/minecraft-server",
+				Image: MINECRAFT_SERVER_IMAGE,
 				Labels: labelBuilder({
 					managed: true,
 					...server,
 				}),
-				Env: [
-					"EULA=TRUE",
-					`SERVER_NAME=${server.name}`,
-					`MOTD=${server.description}`,
-					`VERSION=${server.version}`,
-					`GAMEMODE=${server.gamemode}`,
-					`DIFFICULTY=${server.difficulty}`,
-					`MAX_PLAYERS=${server.maxPlayers}`,
-					`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
-					`TYPE=${server.type}`,
-				],
+				Env: serverEnvBuilder(server),
 				HostConfig: {
 					PortBindings: {
 						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],

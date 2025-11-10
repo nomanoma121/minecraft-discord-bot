@@ -8,7 +8,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, BACKUPS_DIR_PATH } from "../constants";
 import {
 	deleteOldestBackups,
 	getExistingBackups,
@@ -28,7 +28,6 @@ import {
 	getAllServers,
 	getServerByName,
 } from "../utils";
-import { BACKUPS_DIR_PATH } from "../constants";
 
 export const backupCreate = {
 	name: "backup-create",

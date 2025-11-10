@@ -40,3 +40,5 @@ export const SERVER_DEFAULT_ICON_URL =
 export const BACKUPS_DIR_PATH = "/app/data/backups";
 
 export const ICONS_DIR_PATH = "/app/data/icons";
+
+export const MINECRAFT_SERVER_IMAGE = "itzg/minecraft-server";

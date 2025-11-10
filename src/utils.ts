@@ -1,7 +1,7 @@
 import fs from "node:fs";
+import { ICONS_DIR_PATH } from "./constants";
 import { docker, filterLabelBuilder, parseLabels } from "./lib/docker";
 import type { Server } from "./types/server";
-import { ICONS_DIR_PATH } from "./constants";
 
 /**
  * Formats a Date object into a filename-safe timestamp string.

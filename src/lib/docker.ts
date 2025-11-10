@@ -1,5 +1,6 @@
 import type { ContainerInfo } from "dockerode";
 import Docker from "dockerode";
+import { SERVER_DEFAULT_ICON_URL } from "../constants";
 import type { Difficulty, Gamemode, Server, ServerType } from "../types/server";
 
 const DOCKER_LABEL_PREFIX = "mc-bot";
@@ -54,6 +55,21 @@ export const labelBuilder = (opts: Labels): Record<string, string> => {
 				value instanceof Date ? value.toISOString() : String(value),
 			]),
 	);
+};
+
+export const serverEnvBuilder = (server: Server): string[] => {
+	const env: string[] = [
+		`EULA=TRUE`,
+		`SERVER_NAME=${server.name}`,
+		`VERSION=${server.version}`,
+		`MAX_PLAYERS=${server.maxPlayers}`,
+		`DIFFICULTY=${server.difficulty}`,
+		`TYPE=${server.type}`,
+		`GAMEMODE=${server.gamemode}`,
+		`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
+		`MOTD=${server.description}`,
+	];
+	return env;
 };
 
 type ContainerLabels = ContainerInfo["Labels"];

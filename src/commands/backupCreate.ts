@@ -8,7 +8,11 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	BACKUPS_DIR_PATH,
+	OPTIONS,
+} from "../constants";
 import {
 	deleteOldestBackups,
 	getExistingBackups,
@@ -36,7 +40,7 @@ export const backupCreate = {
 		.setDescription("Creates a backup of a Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the Minecraft server to back up.")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -59,7 +63,7 @@ export const backupCreate = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
@@ -139,9 +143,9 @@ export const backupCreate = {
 			await withSafeSave(container, async () => {
 				const timestamp = formatTimestampForFilename(now);
 				const backupFileName = `${timestamp}.tar.gz`;
-				const backupFilePath = `/app/data/backups/${server.id}/${backupFileName}`;
+				const backupFilePath = `${BACKUPS_DIR_PATH}/${server.id}/${backupFileName}`;
 
-				await mkdir(`/app/data/backups/${server.id}`, { recursive: true });
+				await mkdir(`${BACKUPS_DIR_PATH}/${server.id}`, { recursive: true });
 
 				const archive = await container.getArchive({
 					path: "/data",

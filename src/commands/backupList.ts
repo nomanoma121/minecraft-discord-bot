@@ -4,7 +4,7 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS, OPTIONS } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { createInfoEmbed } from "../lib/embed";
 import { formatDateForDisplay, getAllServers, getServerByName } from "../utils";
@@ -16,7 +16,7 @@ export const backupList = {
 		.setDescription("Lists all backups for a Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the Minecraft server to list backups for.")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -24,7 +24,7 @@ export const backupList = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focused = interaction.options.getFocused(true);
-		if (focused.name === "server-name") {
+		if (focused.name === OPTIONS.SERVER_NAME) {
 			const focusedValue = focused.value;
 			const servers = await getAllServers();
 			const filtered = servers.filter((server) =>
@@ -41,7 +41,7 @@ export const backupList = {
 
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],

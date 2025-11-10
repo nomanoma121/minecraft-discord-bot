@@ -5,7 +5,11 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	BACKUPS_DIR_PATH,
+	OPTIONS,
+} from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
 import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
@@ -17,9 +21,6 @@ import {
 	getServerByName,
 } from "../utils";
 
-const SERVER_NAME_OPTION = "server-name";
-const BACKUP_OPTION = "backup";
-
 export const backupRestore = {
 	name: "backup-restore",
 	data: new SlashCommandBuilder()
@@ -27,14 +28,14 @@ export const backupRestore = {
 		.setDescription("Restores a backup of a Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName(SERVER_NAME_OPTION)
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the Minecraft server to restore.")
 				.setAutocomplete(true)
 				.setRequired(true),
 		)
 		.addStringOption((option) =>
 			option
-				.setName(BACKUP_OPTION)
+				.setName(OPTIONS.BACKUP)
 				.setDescription("Timestamp of the backup to restore.")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -42,7 +43,7 @@ export const backupRestore = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focused = interaction.options.getFocused(true);
-		if (focused.name === SERVER_NAME_OPTION) {
+		if (focused.name === OPTIONS.SERVER_NAME) {
 			const focusedValue = focused.value;
 			const servers = await getAllServers();
 			const filtered = servers.filter((server) =>
@@ -54,8 +55,8 @@ export const backupRestore = {
 					value: server.name,
 				})),
 			);
-		} else if (focused.name === BACKUP_OPTION) {
-			const serverName = interaction.options.getString(SERVER_NAME_OPTION);
+		} else if (focused.name === OPTIONS.BACKUP) {
+			const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 			if (!serverName) {
 				await interaction.respond([]);
 				return;
@@ -84,8 +85,8 @@ export const backupRestore = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString(SERVER_NAME_OPTION);
-		const backupTimestamp = interaction.options.getString(BACKUP_OPTION);
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
+		const backupTimestamp = interaction.options.getString(OPTIONS.BACKUP);
 		if (!serverName || !backupTimestamp) {
 			await interaction.editReply({
 				embeds: [
@@ -148,7 +149,7 @@ export const backupRestore = {
 			}
 
 			const backupFileName = `${formatTimestampForFilename(backupToRestore)}.tar.gz`;
-			const backupFilePath = `/app/data/backups/${server.id}/${backupFileName}`;
+			const backupFilePath = `${BACKUPS_DIR_PATH}/${server.id}/${backupFileName}`;
 			const backupStream = createReadStream(backupFilePath);
 			const gunzip = createGunzip();
 

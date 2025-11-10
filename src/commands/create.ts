@@ -9,7 +9,8 @@ import {
 	DEFAULT_MAX_PLAYERS,
 	DIFFICULTY,
 	GAMEMODE,
-	SERVER_DEFAULT_ICON_URL,
+	MINECRAFT_SERVER_IMAGE,
+	OPTIONS,
 	SERVER_TYPE,
 } from "../constants";
 import {
@@ -17,6 +18,7 @@ import {
 	filterLabelBuilder,
 	labelBuilder,
 	parseLabels,
+	serverEnvBuilder,
 } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -34,25 +36,25 @@ export const create = {
 		.setDescription("Creates a new Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the Minecraft server. Must be unique.")
 				.setRequired(true),
 		)
 		.addStringOption((option) =>
 			option
-				.setName("version")
+				.setName(OPTIONS.VERSION)
 				.setDescription("Minecraft version to use")
 				.setRequired(true),
 		)
 		.addStringOption((option) =>
 			option
-				.setName("description")
+				.setName(OPTIONS.DESCRIPTION)
 				.setDescription("Description of the Minecraft server.")
 				.setRequired(false),
 		)
 		.addStringOption((option) =>
 			option
-				.setName("gamemode")
+				.setName(OPTIONS.GAMEMODE)
 				.setDescription(
 					"Game mode (survival, creative, adventure, spectator) (default: survival)",
 				)
@@ -66,7 +68,7 @@ export const create = {
 		)
 		.addStringOption((option) =>
 			option
-				.setName("difficulty")
+				.setName(OPTIONS.DIFFICULTY)
 				.setDescription(
 					"Difficulty level (peaceful, easy, normal, hard) (default: normal)",
 				)
@@ -80,27 +82,27 @@ export const create = {
 		)
 		.addStringOption((option) =>
 			option
-				.setName("server-type")
+				.setName(OPTIONS.SERVER_TYPE)
 				.setDescription("Type of Minecraft server (default: paper)")
 				.setChoices({ name: "paper", value: SERVER_TYPE.PAPER })
 				.setRequired(false),
 		)
 		.addIntegerOption((option) =>
 			option
-				.setName("max-players")
+				.setName(OPTIONS.MAX_PLAYERS)
 				.setDescription("Maximum number of players (default: 20)")
 				.setRequired(false),
 		)
 		.addAttachmentOption((option) =>
 			option
-				.setName("icon")
+				.setName(OPTIONS.ICON)
 				.setDescription("PNG image to use as the server icon"),
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
@@ -108,7 +110,7 @@ export const create = {
 			return;
 		}
 
-		const version = interaction.options.getString("version");
+		const version = interaction.options.getString(OPTIONS.VERSION);
 		if (!version) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Minecraft version is required.")],
@@ -116,7 +118,7 @@ export const create = {
 			return;
 		}
 
-		const iconAttachment = interaction.options.getAttachment("icon");
+		const iconAttachment = interaction.options.getAttachment(OPTIONS.ICON);
 		if (iconAttachment && !iconAttachment.contentType?.includes("image/png")) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server icon must be a PNG image.")],
@@ -130,19 +132,20 @@ export const create = {
 			name: serverName,
 			version: version,
 			maxPlayers:
-				interaction.options.getString("max-players") ||
+				interaction.options.getString(OPTIONS.MAX_PLAYERS) ||
 				DEFAULT_MAX_PLAYERS.toString(),
 			difficulty:
-				(interaction.options.getString("difficulty") as Difficulty) ||
+				(interaction.options.getString(OPTIONS.DIFFICULTY) as Difficulty) ||
 				DIFFICULTY.NORMAL,
 			type:
-				(interaction.options.getString("server-type") as ServerType) ||
+				(interaction.options.getString(OPTIONS.SERVER_TYPE) as ServerType) ||
 				SERVER_TYPE.PAPER,
 			gamemode:
-				(interaction.options.getString("gamemode") as Gamemode) ||
+				(interaction.options.getString(OPTIONS.GAMEMODE) as Gamemode) ||
 				GAMEMODE.SURVIVAL,
 			description:
-				interaction.options.getString("description") || "A Minecraft server",
+				interaction.options.getString(OPTIONS.DESCRIPTION) ||
+				"A Minecraft server",
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
@@ -225,22 +228,12 @@ export const create = {
 
 			await docker.createContainer({
 				name: server.id,
-				Image: "itzg/minecraft-server",
+				Image: MINECRAFT_SERVER_IMAGE,
 				Labels: labelBuilder({
 					managed: true,
 					...server,
 				}),
-				Env: [
-					"EULA=TRUE",
-					`SERVER_NAME=${server.name}`,
-					`MOTD=${server.description}`,
-					`VERSION=${server.version}`,
-					`GAMEMODE=${server.gamemode}`,
-					`DIFFICULTY=${server.difficulty}`,
-					`MAX_PLAYERS=${server.maxPlayers}`,
-					`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
-					`TYPE=${server.type}`,
-				],
+				Env: serverEnvBuilder(server),
 				HostConfig: {
 					PortBindings: {
 						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],

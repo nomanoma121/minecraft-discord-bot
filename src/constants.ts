@@ -28,6 +28,18 @@ export const EMBED_COLORS = {
 	INFO: 0x0099ff,
 } as const;
 
+export const OPTIONS = {
+	SERVER_NAME: "server-name",
+	DESCRIPTION: "description",
+	MAX_PLAYERS: "max-players",
+	GAMEMODE: "gamemode",
+	DIFFICULTY: "difficulty",
+	VERSION: "version",
+	SERVER_TYPE: "server-type",
+	ICON: "icon",
+	BACKUP: "backup",
+} as const;
+
 export const DEFAULT_MAX_PLAYERS = 20;
 
 export const AUTOCOMPLETE_MAX_CHOICES = 25;
@@ -36,3 +48,9 @@ export const COMMAND_TIMEOUT_MS = 6 * 60 * 1000;
 
 export const SERVER_DEFAULT_ICON_URL =
 	"https://minecraft.wiki/images/Grass_Block_JE7_BE6.png";
+
+export const BACKUPS_DIR_PATH = "/app/data/backups";
+
+export const ICONS_DIR_PATH = "/app/data/icons";
+
+export const MINECRAFT_SERVER_IMAGE = "itzg/minecraft-server";

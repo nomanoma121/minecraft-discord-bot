@@ -10,13 +10,14 @@ import {
 	AUTOCOMPLETE_MAX_CHOICES,
 	DIFFICULTY,
 	GAMEMODE,
-	SERVER_DEFAULT_ICON_URL,
+	OPTIONS,
 } from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
 	labelBuilder,
 	parseLabels,
+	serverEnvBuilder,
 } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -34,20 +35,20 @@ export const edit = {
 		.setDescription("Edit an existing Minecraft server configuration")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the server to edit")
 				.setAutocomplete(true)
 				.setRequired(true),
 		)
 		.addStringOption((option) =>
 			option
-				.setName("description")
+				.setName(OPTIONS.DESCRIPTION)
 				.setDescription("New description for the server")
 				.setRequired(false),
 		)
 		.addIntegerOption((option) =>
 			option
-				.setName("max-players")
+				.setName(OPTIONS.MAX_PLAYERS)
 				.setDescription("Maximum number of players")
 				.setMinValue(1)
 				.setMaxValue(100)
@@ -55,7 +56,7 @@ export const edit = {
 		)
 		.addStringOption((option) =>
 			option
-				.setName("gamemode")
+				.setName(OPTIONS.GAMEMODE)
 				.setDescription("Game mode")
 				.setChoices(
 					{ name: "survival", value: GAMEMODE.SURVIVAL },
@@ -67,7 +68,7 @@ export const edit = {
 		)
 		.addStringOption((option) =>
 			option
-				.setName("difficulty")
+				.setName(OPTIONS.DIFFICULTY)
 				.setDescription("Difficulty level")
 				.setChoices(
 					{ name: "peaceful", value: DIFFICULTY.PEACEFUL },
@@ -79,13 +80,13 @@ export const edit = {
 		)
 		.addStringOption((option) =>
 			option
-				.setName("version")
+				.setName(OPTIONS.VERSION)
 				.setDescription("Minecraft version")
 				.setRequired(false),
 		)
 		.addAttachmentOption((option) =>
 			option
-				.setName("icon")
+				.setName(OPTIONS.ICON)
 				.setDescription(
 					"Icon image for the server (PNG format, will be automatically resized to 64x64 pixels)",
 				)
@@ -109,7 +110,7 @@ export const edit = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
@@ -117,16 +118,16 @@ export const edit = {
 			return;
 		}
 
-		const description = interaction.options.getString("description");
-		const maxPlayers = interaction.options.getInteger("max-players");
+		const description = interaction.options.getString(OPTIONS.DESCRIPTION);
+		const maxPlayers = interaction.options.getInteger(OPTIONS.MAX_PLAYERS);
 		const gamemode = interaction.options.getString(
-			"gamemode",
+			OPTIONS.GAMEMODE,
 		) as Gamemode | null;
 		const difficulty = interaction.options.getString(
-			"difficulty",
+			OPTIONS.DIFFICULTY,
 		) as Difficulty | null;
-		const version = interaction.options.getString("version");
-		const iconAttachment = interaction.options.getAttachment("icon");
+		const version = interaction.options.getString(OPTIONS.VERSION);
+		const iconAttachment = interaction.options.getAttachment(OPTIONS.ICON);
 
 		if (
 			!description &&
@@ -240,17 +241,7 @@ export const edit = {
 					...server,
 					...updatedServer,
 				}),
-				Env: [
-					"EULA=TRUE",
-					`SERVER_NAME=${updatedServer.name}`,
-					`MOTD=${updatedServer.description}`,
-					`VERSION=${updatedServer.version}`,
-					`GAMEMODE=${updatedServer.gamemode}`,
-					`DIFFICULTY=${updatedServer.difficulty}`,
-					`MAX_PLAYERS=${updatedServer.maxPlayers}`,
-					`ICON=${updatedServer.iconPath || SERVER_DEFAULT_ICON_URL}`,
-					`TYPE=${server.type}`, // type is not editable
-				],
+				Env: serverEnvBuilder(updatedServer),
 				HostConfig: {
 					PortBindings: {
 						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],

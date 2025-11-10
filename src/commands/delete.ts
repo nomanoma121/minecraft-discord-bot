@@ -4,7 +4,12 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	BACKUPS_DIR_PATH,
+	ICONS_DIR_PATH,
+	OPTIONS,
+} from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -21,7 +26,7 @@ const deleteCommand = {
 		.setDescription("Deletes a Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the server to delete")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -44,7 +49,7 @@ const deleteCommand = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
@@ -99,8 +104,11 @@ const deleteCommand = {
 			const containerInstance = docker.getContainer(container.Id);
 
 			await containerInstance.remove({ v: true });
-			await rm(`/app/data/backups/${server.id}`, { recursive: true, force: true });
-			await rm(`/app/data/icons/${server.id}.png`, { force: true });
+			await rm(`${BACKUPS_DIR_PATH}/${server.id}`, {
+				recursive: true,
+				force: true,
+			});
+			await rm(`${ICONS_DIR_PATH}/${server.id}.png`, { force: true });
 
 			await interaction.editReply({
 				content: "",

@@ -5,7 +5,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import type Dockerode from "dockerode";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, OPTIONS } from "../constants";
 import { docker } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -26,7 +26,7 @@ export const status = {
 		.setDescription("Shows the status of a Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the server to check")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -49,7 +49,7 @@ export const status = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],

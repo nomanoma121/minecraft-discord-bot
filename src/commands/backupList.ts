@@ -74,7 +74,7 @@ export const backupList = {
 			.join("\n");
 
 		const embed = new EmbedBuilder()
-			.setTitle(`Backups for server **${serverName}**`)
+			.setTitle(`Backups for server ${serverName}`)
 			.setColor(EMBED_COLORS.INFO)
 			.setDescription(backupList);
 

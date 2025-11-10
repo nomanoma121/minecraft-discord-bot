@@ -40,7 +40,7 @@ export const list = {
 				const container = docker.getContainer(server.id);
 				const containerInfo = await container.inspect();
 				status += isRunning
-					? ` ${formatUptime(containerInfo.State.StartedAt)}`
+					? ` for ${formatUptime(containerInfo.State.StartedAt)}`
 					: ` ${formatUptime(containerInfo.State.FinishedAt)}`;
 				description += `- **${server.name}** (owner: <@${server.ownerId}>) - ${status} \n`;
 			}

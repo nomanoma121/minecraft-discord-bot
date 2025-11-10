@@ -80,7 +80,7 @@ export const status = {
 			}
 			const isRunning = containerInfo.State.Running;
 			const uptime = isRunning
-				? formatUptime(containerInfo.State.StartedAt)
+				? `for ${formatUptime(containerInfo.State.StartedAt)}`
 				: formatUptime(containerInfo.State.FinishedAt);
 			const status = `${isRunning ? "Running" : "Stopped"} ${uptime}`;
 

@@ -1,6 +1,6 @@
 import type { AttachmentBuilder } from "discord.js";
 import { EmbedBuilder } from "discord.js";
-import { EMBED_COLORS } from "../constants";
+import { EMBED_COLORS, SERVER_DEFAULT_ICON_URL } from "../constants";
 import type { Server } from "../types/server";
 
 export const createErrorEmbed = (errorMessage: string) => {
@@ -47,6 +47,8 @@ export const createServerInfoEmbed = (
 
 	if (options?.attachment) {
 		embed.setThumbnail(`attachment://${options.attachment.name}`);
+	} else {
+		embed.setThumbnail(SERVER_DEFAULT_ICON_URL);
 	}
 
 	return embed;

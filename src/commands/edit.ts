@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import sharp from "sharp";
 import { Config } from "../config";
-import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE, SERVER_DEFAULT_ICON_URL } from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
@@ -118,9 +118,10 @@ export const edit = {
 		const difficulty = interaction.options.getString(
 			"difficulty",
 		) as Difficulty | null;
-		const version = interaction.options.getString("version");
+		const version = interaction.options.getString("version");		
+		const iconAttachment = interaction.options.getAttachment("icon");
 
-		if (!description && !maxPlayers && !gamemode && !difficulty && !version) {
+		if (!description && !maxPlayers && !gamemode && !difficulty && !version && !iconAttachment) {
 			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
@@ -138,7 +139,6 @@ export const edit = {
 			return;
 		}
 
-		const iconAttachment = interaction.options.getAttachment("icon");
 		if (iconAttachment && !iconAttachment.contentType?.includes("image/png")) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server icon must be a PNG image.")],
@@ -234,6 +234,7 @@ export const edit = {
 					`GAMEMODE=${updatedServer.gamemode}`,
 					`DIFFICULTY=${updatedServer.difficulty}`,
 					`MAX_PLAYERS=${updatedServer.maxPlayers}`,
+					`ICON=${updatedServer.iconPath || SERVER_DEFAULT_ICON_URL}`,
 					`TYPE=${server.type}`, // type is not editable
 				],
 				HostConfig: {

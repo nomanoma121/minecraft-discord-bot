@@ -28,6 +28,7 @@ export const filterLabelBuilder = (opts: Labels): string[] => {
 			case "gamemode":
 			case "description":
 			case "managed":
+			case "iconPath":
 			case "createdAt":
 			case "updatedAt":
 				labels.push(
@@ -67,7 +68,7 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 		return value;
 	};
 
-	return {
+	const server: Server = {
 		id: getValue("id"),
 		ownerId: getValue("ownerId"),
 		name: getValue("name"),
@@ -80,4 +81,10 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 		createdAt: new Date(getValue("createdAt")),
 		updatedAt: new Date(getValue("updatedAt")),
 	};
+
+	if (labels[`${DOCKER_LABEL_PREFIX}.iconPath`]) {
+		server.iconPath = getValue("iconPath");
+	}
+
+	return server;
 };

@@ -111,9 +111,9 @@ export const backupCreate = {
 			await withSafeSave(container, async () => {
 				const timestamp = formatTimestampForFilename(now);
 				const backupFileName = `${timestamp}.tar.gz`;
-				const backupFilePath = `/backups/${server.id}/${backupFileName}`;
+				const backupFilePath = `/app/data/backups/${server.id}/${backupFileName}`;
 
-				await mkdir(`/backups/${server.id}`, { recursive: true });
+				await mkdir(`/app/data/backups/${server.id}`, { recursive: true });
 
 				const archive = await container.getArchive({
 					path: "/data",

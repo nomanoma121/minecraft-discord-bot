@@ -1,12 +1,15 @@
 import {
+	AttachmentBuilder,
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
+import sharp from "sharp";
 import { Config } from "../config";
 import {
 	DEFAULT_MAX_PLAYERS,
 	DIFFICULTY,
 	GAMEMODE,
+	SERVER_DEFAULT_ICON_URL,
 	SERVER_TYPE,
 } from "../constants";
 import {
@@ -21,7 +24,8 @@ import {
 	createServerInfoEmbed,
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
-import type { Difficulty, Gamemode, ServerType } from "../types/server";
+import type { Difficulty, Gamemode, Server, ServerType } from "../types/server";
+import { saveIconImage } from "../utils";
 
 export const create = {
 	name: "create",
@@ -86,6 +90,11 @@ export const create = {
 				.setName("max-players")
 				.setDescription("Maximum number of players (default: 20)")
 				.setRequired(false),
+		)
+		.addAttachmentOption((option) =>
+			option
+				.setName("icon")
+				.setDescription("PNG image to use as the server icon"),
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
@@ -107,7 +116,15 @@ export const create = {
 			return;
 		}
 
-		const server = {
+		const iconAttachment = interaction.options.getAttachment("icon");
+		if (iconAttachment && !iconAttachment.contentType?.includes("image/png")) {
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server icon must be a PNG image.")],
+			});
+			return;
+		}
+
+		const server: Server = {
 			id: crypto.randomUUID(),
 			ownerId: interaction.user.id,
 			name: serverName,
@@ -129,6 +146,32 @@ export const create = {
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
+
+		let serverIconAttachment: AttachmentBuilder | undefined;
+		if (iconAttachment) {
+			try {
+				const response = await fetch(iconAttachment.url);
+				const imageBuffer = Buffer.from(await response.arrayBuffer());
+				const resizedImageBuffer = await sharp(imageBuffer)
+					.resize(64, 64)
+					.png()
+					.toBuffer();
+				serverIconAttachment = new AttachmentBuilder(resizedImageBuffer, {
+					name: `${server.id}.png`,
+				});
+				server.iconPath = await saveIconImage(server.id, resizedImageBuffer);
+			} catch (error) {
+				console.error("Error saving server icon:", error);
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							"An error occurred while saving the server icon. Please try again.",
+						),
+					],
+				});
+				return;
+			}
+		}
 
 		const release = await mutex.acquire();
 
@@ -195,6 +238,7 @@ export const create = {
 					`GAMEMODE=${server.gamemode}`,
 					`DIFFICULTY=${server.difficulty}`,
 					`MAX_PLAYERS=${server.maxPlayers}`,
+					`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
 					`TYPE=${server.type}`,
 				],
 				HostConfig: {
@@ -211,7 +255,10 @@ export const create = {
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Created Successfully!`,
-				embeds: [createServerInfoEmbed(server)],
+				embeds: [
+					createServerInfoEmbed(server, { attachment: serverIconAttachment }),
+				],
+				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);

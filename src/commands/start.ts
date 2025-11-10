@@ -1,4 +1,5 @@
 import {
+	AttachmentBuilder,
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
@@ -11,7 +12,7 @@ import {
 	createServerInfoEmbed,
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
-import { getAllServers, getRunningServers } from "../utils";
+import { getAllServers, getIconImage, getRunningServers } from "../utils";
 
 const HEALTH_INTERVAL = 5000;
 const HEALTH_TIMEOUT = 300000;
@@ -127,10 +128,20 @@ export const start = {
 			}
 
 			const server = parseLabels(container.Labels);
+			const serverIconBuffer = await getIconImage(server.id);
+			let serverIconAttachment: AttachmentBuilder | undefined;
+			if (serverIconBuffer) {
+				serverIconAttachment = new AttachmentBuilder(serverIconBuffer, {
+					name: `${server.id}.png`,
+				});
+			}
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Started Successfully!`,
-				embeds: [createServerInfoEmbed(server)],
+				embeds: [
+					createServerInfoEmbed(server, { attachment: serverIconAttachment }),
+				],
+				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);

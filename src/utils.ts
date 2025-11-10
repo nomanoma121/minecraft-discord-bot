@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { docker, filterLabelBuilder, parseLabels } from "./lib/docker";
 import type { Server } from "./types/server";
 
@@ -111,4 +112,26 @@ export const getRunningServers = async (): Promise<Server[]> => {
 	});
 	const servers = containers.map((c) => parseLabels(c.Labels));
 	return servers;
+};
+
+export const saveIconImage = async (
+	serverId: string,
+	imageBuffer: Buffer,
+): Promise<string> => {
+	const iconsDir = `/app/data/icons`;
+	await fs.promises.mkdir(iconsDir, { recursive: true });
+	const iconPath = `${iconsDir}/${serverId}.png`;
+	await fs.promises.writeFile(iconPath, imageBuffer);
+	return iconPath;
+};
+
+export const getIconImage = async (
+	serverId: string,
+): Promise<Buffer | null> => {
+	const iconPath = `/app/data/icons/${serverId}.png`;
+	try {
+		return await fs.promises.readFile(iconPath);
+	} catch {
+		return null;
+	}
 };

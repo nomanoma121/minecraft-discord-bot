@@ -1,10 +1,17 @@
 import {
+	AttachmentBuilder,
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
+import sharp from "sharp";
 import { Config } from "../config";
-import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	DIFFICULTY,
+	GAMEMODE,
+	SERVER_DEFAULT_ICON_URL,
+} from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
@@ -18,7 +25,7 @@ import {
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
-import { getAllServers } from "../utils";
+import { getAllServers, saveIconImage } from "../utils";
 
 export const edit = {
 	name: "edit",
@@ -75,6 +82,14 @@ export const edit = {
 				.setName("version")
 				.setDescription("Minecraft version")
 				.setRequired(false),
+		)
+		.addAttachmentOption((option) =>
+			option
+				.setName("icon")
+				.setDescription(
+					"Icon image for the server (PNG format, will be automatically resized to 64x64 pixels)",
+				)
+				.setRequired(false),
 		),
 
 	async autocomplete(interaction: AutocompleteInteraction) {
@@ -111,8 +126,16 @@ export const edit = {
 			"difficulty",
 		) as Difficulty | null;
 		const version = interaction.options.getString("version");
+		const iconAttachment = interaction.options.getAttachment("icon");
 
-		if (!description && !maxPlayers && !gamemode && !difficulty && !version) {
+		if (
+			!description &&
+			!maxPlayers &&
+			!gamemode &&
+			!difficulty &&
+			!version &&
+			!iconAttachment
+		) {
 			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
@@ -126,6 +149,13 @@ export const edit = {
 		if (maxPlayers && (maxPlayers < 1 || maxPlayers > 100)) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Max players must be between 1 and 100.")],
+			});
+			return;
+		}
+
+		if (iconAttachment && !iconAttachment.contentType?.includes("image/png")) {
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server icon must be a PNG image.")],
 			});
 			return;
 		}
@@ -172,9 +202,26 @@ export const edit = {
 				return;
 			}
 
-			await interaction.editReply("⌛ Updating the server...");
-
 			const updatedServer: Server = { ...server, updatedAt: new Date() };
+
+			let serverIconAttachment: AttachmentBuilder | undefined;
+			if (iconAttachment) {
+				const response = await fetch(iconAttachment.url);
+				const imageBuffer = Buffer.from(await response.arrayBuffer());
+				const resizedImageBuffer = await sharp(imageBuffer)
+					.resize(64, 64)
+					.png()
+					.toBuffer();
+				serverIconAttachment = new AttachmentBuilder(resizedImageBuffer, {
+					name: `${server.id}.png`,
+				});
+				updatedServer.iconPath = await saveIconImage(
+					server.id,
+					resizedImageBuffer,
+				);
+			}
+
+			await interaction.editReply("⌛ Updating the server...");
 
 			if (description) updatedServer.description = description;
 			if (maxPlayers) updatedServer.maxPlayers = String(maxPlayers);
@@ -201,6 +248,7 @@ export const edit = {
 					`GAMEMODE=${updatedServer.gamemode}`,
 					`DIFFICULTY=${updatedServer.difficulty}`,
 					`MAX_PLAYERS=${updatedServer.maxPlayers}`,
+					`ICON=${updatedServer.iconPath || SERVER_DEFAULT_ICON_URL}`,
 					`TYPE=${server.type}`, // type is not editable
 				],
 				HostConfig: {
@@ -216,7 +264,12 @@ export const edit = {
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Updated Successfully!`,
-				embeds: [createServerInfoEmbed(updatedServer)],
+				embeds: [
+					createServerInfoEmbed(updatedServer, {
+						attachment: serverIconAttachment,
+					}),
+				],
+				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {
 			console.error("Error editing server:", error);

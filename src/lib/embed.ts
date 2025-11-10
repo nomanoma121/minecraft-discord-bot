@@ -1,3 +1,4 @@
+import type { AttachmentBuilder } from "discord.js";
 import { EmbedBuilder } from "discord.js";
 import { EMBED_COLORS, SERVER_DEFAULT_ICON_URL } from "../constants";
 import type { Server } from "../types/server";
@@ -23,12 +24,14 @@ export const createSuccessEmbed = (description: string) => {
 		.setDescription(description);
 };
 
-export const createServerInfoEmbed = (server: Server, status?: string) => {
+export const createServerInfoEmbed = (
+	server: Server,
+	options?: { status?: string; attachment?: AttachmentBuilder },
+) => {
 	const embed = new EmbedBuilder()
 		.setTitle(server.name)
 		.setColor(EMBED_COLORS.INFO)
 		.setDescription(server.description)
-		.setThumbnail(SERVER_DEFAULT_ICON_URL)
 		.addFields(
 			{ name: "Version", value: server.version, inline: true },
 			{ name: "Server Type", value: server.type, inline: true },
@@ -38,8 +41,14 @@ export const createServerInfoEmbed = (server: Server, status?: string) => {
 			{ name: "Max Players", value: server.maxPlayers, inline: true },
 		);
 
-	if (status) {
-		embed.addFields({ name: "Status", value: status, inline: true });
+	if (options?.status) {
+		embed.addFields({ name: "Status", value: options.status, inline: true });
+	}
+
+	if (options?.attachment) {
+		embed.setThumbnail(`attachment://${options.attachment.name}`);
+	} else {
+		embed.setThumbnail(SERVER_DEFAULT_ICON_URL);
 	}
 
 	return embed;

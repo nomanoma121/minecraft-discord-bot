@@ -148,7 +148,7 @@ export const backupRestore = {
 			}
 
 			const backupFileName = `${formatTimestampForFilename(backupToRestore)}.tar.gz`;
-			const backupFilePath = `/backups/${server.id}/${backupFileName}`;
+			const backupFilePath = `/app/data/backups/${server.id}/${backupFileName}`;
 			const backupStream = createReadStream(backupFilePath);
 			const gunzip = createGunzip();
 

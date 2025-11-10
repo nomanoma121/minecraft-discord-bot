@@ -86,7 +86,7 @@ export const edit = {
 		.addAttachmentOption((option) =>
 			option
 				.setName("icon")
-				.setDescription("Icon image for the server (PNG format)")
+				.setDescription("Icon image for the server (PNG format, will be automatically resized to 64x64 pixels)")
 				.setRequired(false),
 		),
 

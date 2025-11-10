@@ -90,7 +90,7 @@ export const status = {
 				: formatUptime(containerInfo.State.FinishedAt);
 			const status = `${isRunning ? "Running" : "Stopped"} ${uptime}`;
 
-			const serverIconBuffer = getIconImage(server.id);
+			const serverIconBuffer = await getIconImage(server.id);
 			let serverIconAttachment: AttachmentBuilder | undefined;
 			if (serverIconBuffer) {
 				serverIconAttachment = new AttachmentBuilder(serverIconBuffer, {

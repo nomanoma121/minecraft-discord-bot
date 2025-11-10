@@ -128,7 +128,7 @@ export const start = {
 			}
 
 			const server = parseLabels(container.Labels);
-			const serverIconBuffer = getIconImage(server.id);
+			const serverIconBuffer = await getIconImage(server.id);
 			let serverIconAttachment: AttachmentBuilder | undefined;
 			if (serverIconBuffer) {
 				serverIconAttachment = new AttachmentBuilder(serverIconBuffer, {

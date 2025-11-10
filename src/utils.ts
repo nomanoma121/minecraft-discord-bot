@@ -125,7 +125,9 @@ export const saveIconImage = async (
 	return iconPath;
 };
 
-export const getIconImage = async (serverId: string): Promise<Buffer | null> => {
+export const getIconImage = async (
+	serverId: string,
+): Promise<Buffer | null> => {
 	const iconPath = `/app/data/icons/${serverId}.png`;
 	try {
 		return await fs.promises.readFile(iconPath);

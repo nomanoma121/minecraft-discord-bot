@@ -86,7 +86,9 @@ export const edit = {
 		.addAttachmentOption((option) =>
 			option
 				.setName("icon")
-				.setDescription("Icon image for the server (PNG format, will be automatically resized to 64x64 pixels)")
+				.setDescription(
+					"Icon image for the server (PNG format, will be automatically resized to 64x64 pixels)",
+				)
 				.setRequired(false),
 		),
 
@@ -189,6 +191,17 @@ export const edit = {
 				return;
 			}
 
+			if (container.State === "running") {
+				await interaction.editReply({
+					embeds: [
+						createInfoEmbed(
+							`Server **${serverName}** is currently running. Please stop the server before editing its configuration.`,
+						),
+					],
+				});
+				return;
+			}
+
 			const updatedServer: Server = { ...server, updatedAt: new Date() };
 
 			let serverIconAttachment: AttachmentBuilder | undefined;
@@ -206,17 +219,6 @@ export const edit = {
 					server.id,
 					resizedImageBuffer,
 				);
-			}
-
-			if (container.State === "running") {
-				await interaction.editReply({
-					embeds: [
-						createInfoEmbed(
-							`Server **${serverName}** is currently running. Please stop the server before editing its configuration.`,
-						),
-					],
-				});
-				return;
 			}
 
 			await interaction.editReply("⌛ Updating the server...");

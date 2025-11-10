@@ -39,7 +39,18 @@ export const formatDateForDisplay = (date: Date): string => {
 export const formatUptime = (dateString: string): string => {
 	const startTime = new Date(dateString);
 	const now = new Date();
+
+	// Invalid date check
+	if (Number.isNaN(startTime.getTime())) {
+		return "Not started";
+	}
+
 	const diffMs = now.getTime() - startTime.getTime();
+
+	// Not started yet (future date or zero date like 0001-01-01)
+	if (diffMs <= 0) {
+		return "Not started";
+	}
 
 	const seconds = Math.floor(diffMs / 1000);
 	const minutes = Math.floor(seconds / 60);

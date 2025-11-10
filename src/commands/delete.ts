@@ -8,6 +8,7 @@ import {
 	AUTOCOMPLETE_MAX_CHOICES,
 	BACKUPS_DIR_PATH,
 	ICONS_DIR_PATH,
+	OPTIONS,
 } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import {
@@ -25,7 +26,7 @@ const deleteCommand = {
 		.setDescription("Deletes a Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the server to delete")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -48,7 +49,7 @@ const deleteCommand = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],

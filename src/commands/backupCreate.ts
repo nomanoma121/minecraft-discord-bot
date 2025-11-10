@@ -8,7 +8,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { AUTOCOMPLETE_MAX_CHOICES, BACKUPS_DIR_PATH } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, BACKUPS_DIR_PATH, OPTIONS } from "../constants";
 import {
 	deleteOldestBackups,
 	getExistingBackups,
@@ -36,7 +36,7 @@ export const backupCreate = {
 		.setDescription("Creates a backup of a Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the Minecraft server to back up.")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -59,7 +59,7 @@ export const backupCreate = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],

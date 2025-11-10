@@ -4,7 +4,7 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES, HEALTH_STATUS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, HEALTH_STATUS, OPTIONS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -24,7 +24,7 @@ export const start = {
 		.setDescription("Starts an existing Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName("server-name")
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the server to start")
 				.setRequired(true)
 				.setAutocomplete(true),
@@ -47,7 +47,7 @@ export const start = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],

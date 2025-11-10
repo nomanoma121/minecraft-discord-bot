@@ -4,7 +4,11 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES, BACKUPS_DIR_PATH } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	BACKUPS_DIR_PATH,
+	OPTIONS,
+} from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import {
 	createErrorEmbed,
@@ -19,9 +23,6 @@ import {
 	getServerByName,
 } from "../utils";
 
-const SERVER_NAME_OPTION = "server-name";
-const BACKUP_OPTION = "backup";
-
 export const backupDelete = {
 	name: "backup-delete",
 	data: new SlashCommandBuilder()
@@ -29,14 +30,14 @@ export const backupDelete = {
 		.setDescription("Deletes a backup for a specified Minecraft server")
 		.addStringOption((option) =>
 			option
-				.setName(SERVER_NAME_OPTION)
+				.setName(OPTIONS.SERVER_NAME)
 				.setDescription("Name of the server")
 				.setAutocomplete(true)
 				.setRequired(true),
 		)
 		.addStringOption((option) =>
 			option
-				.setName(BACKUP_OPTION)
+				.setName(OPTIONS.BACKUP)
 				.setDescription("The backup to delete")
 				.setAutocomplete(true)
 				.setRequired(true),
@@ -44,7 +45,7 @@ export const backupDelete = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		const focused = interaction.options.getFocused(true);
-		if (focused.name === SERVER_NAME_OPTION) {
+		if (focused.name === OPTIONS.SERVER_NAME) {
 			const focusedValue = focused.value;
 			const servers = await getAllServers();
 			const filtered = servers.filter((server) =>
@@ -56,8 +57,8 @@ export const backupDelete = {
 					value: server.name,
 				})),
 			);
-		} else if (focused.name === BACKUP_OPTION) {
-			const serverName = interaction.options.getString(SERVER_NAME_OPTION);
+		} else if (focused.name === OPTIONS.BACKUP) {
+			const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 			if (!serverName) {
 				await interaction.respond([]);
 				return;
@@ -86,7 +87,7 @@ export const backupDelete = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
-		const serverName = interaction.options.getString(SERVER_NAME_OPTION);
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
@@ -94,7 +95,7 @@ export const backupDelete = {
 			return;
 		}
 
-		const backupTimestamp = interaction.options.getString(BACKUP_OPTION);
+		const backupTimestamp = interaction.options.getString(OPTIONS.BACKUP);
 		if (!backupTimestamp) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Backup timestamp is required.")],

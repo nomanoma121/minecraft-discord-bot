@@ -28,6 +28,18 @@ export const EMBED_COLORS = {
 	INFO: 0x0099ff,
 } as const;
 
+export const OPTIONS = {
+	SERVER_NAME: "server-name",
+	DESCRIPTION: "description",
+	MAX_PLAYERS: "max-players",
+	GAMEMODE: "gamemode",
+	DIFFICULTY: "difficulty",
+	VERSION: "version",
+	SERVER_TYPE: "server-type",
+	ICON: "icon",
+	BACKUP: "backup",
+};
+
 export const DEFAULT_MAX_PLAYERS = 20;
 
 export const AUTOCOMPLETE_MAX_CHOICES = 25;

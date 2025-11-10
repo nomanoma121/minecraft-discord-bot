@@ -4,6 +4,7 @@ import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
 import { parseTimestampFromFilename } from "../utils.js";
 import { docker } from "./docker.js";
+import { BACKUPS_DIR_PATH } from "../constants.js";
 
 /**
  * Executes save-off, save-all, and save-on commands around a callback to ensure
@@ -52,7 +53,7 @@ export const withSafeSave = async (
 };
 
 export const getExistingBackups = async (serverId: string): Promise<Date[]> => {
-	const backupsDir = `/app/data/backups/${serverId}`;
+	const backupsDir = `${BACKUPS_DIR_PATH}/${serverId}`;
 	try {
 		const files = await fs.promises.readdir(backupsDir);
 		const filtered = files
@@ -69,12 +70,11 @@ export const getExistingBackups = async (serverId: string): Promise<Date[]> => {
 };
 
 export const getTotalBackupCounts = async (): Promise<number> => {
-	const backupsRootDir = `/app/data/backups`;
 	try {
-		const serverDirs = await fs.promises.readdir(backupsRootDir);
+		const serverDirs = await fs.promises.readdir(BACKUPS_DIR_PATH);
 		let totalCount = 0;
 		for (const serverId of serverDirs) {
-			const serverBackupDir = `${backupsRootDir}/${serverId}`;
+			const serverBackupDir = `${BACKUPS_DIR_PATH}/${serverId}`;
 			const stat = await fs.promises.stat(serverBackupDir);
 			if (!stat.isDirectory()) continue;
 
@@ -90,7 +90,7 @@ export const getTotalBackupCounts = async (): Promise<number> => {
 };
 
 export const deleteOldestBackups = async (serverId: string): Promise<void> => {
-	const backupsDir = `/app/data/backups/${serverId}`;
+	const backupsDir = `${BACKUPS_DIR_PATH}/${serverId}`;
 	try {
 		const files = await fs.promises.readdir(backupsDir);
 		const backupFiles = files.filter((file) => file.endsWith(".tar.gz")).sort();

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { docker, filterLabelBuilder, parseLabels } from "./lib/docker";
 import type { Server } from "./types/server";
+import { ICONS_DIR_PATH } from "./constants";
 
 /**
  * Formats a Date object into a filename-safe timestamp string.
@@ -118,9 +119,8 @@ export const saveIconImage = async (
 	serverId: string,
 	imageBuffer: Buffer,
 ): Promise<string> => {
-	const iconsDir = `/app/data/icons`;
-	await fs.promises.mkdir(iconsDir, { recursive: true });
-	const iconPath = `${iconsDir}/${serverId}.png`;
+	await fs.promises.mkdir(ICONS_DIR_PATH, { recursive: true });
+	const iconPath = `${ICONS_DIR_PATH}/${serverId}.png`;
 	await fs.promises.writeFile(iconPath, imageBuffer);
 	return iconPath;
 };
@@ -128,7 +128,7 @@ export const saveIconImage = async (
 export const getIconImage = async (
 	serverId: string,
 ): Promise<Buffer | null> => {
-	const iconPath = `/app/data/icons/${serverId}.png`;
+	const iconPath = `${ICONS_DIR_PATH}/${serverId}.png`;
 	try {
 		return await fs.promises.readFile(iconPath);
 	} catch {

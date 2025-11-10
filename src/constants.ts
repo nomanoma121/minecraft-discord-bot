@@ -36,3 +36,7 @@ export const COMMAND_TIMEOUT_MS = 6 * 60 * 1000;
 
 export const SERVER_DEFAULT_ICON_URL =
 	"https://minecraft.wiki/images/Grass_Block_JE7_BE6.png";
+
+export const BACKUPS_DIR_PATH = "/app/data/backups";
+
+export const ICONS_DIR_PATH = "/app/data/icons";

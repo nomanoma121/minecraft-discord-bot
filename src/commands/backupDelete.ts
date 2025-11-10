@@ -18,6 +18,7 @@ import {
 	getAllServers,
 	getServerByName,
 } from "../utils";
+import { BACKUPS_DIR_PATH } from "../constants";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";
@@ -142,7 +143,7 @@ export const backupDelete = {
 
 		try {
 			const backupFileName = `${formatTimestampForFilename(backupToDelete)}.tar.gz`;
-			const backupFilePath = `/app/data/backups/${server.id}/${backupFileName}`;
+			const backupFilePath = `${BACKUPS_DIR_PATH}/${server.id}/${backupFileName}`;
 
 			await interaction.editReply("⌛ Deleting backup...");
 

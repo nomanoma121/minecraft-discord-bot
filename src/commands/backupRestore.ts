@@ -16,6 +16,7 @@ import {
 	getAllServers,
 	getServerByName,
 } from "../utils";
+import { BACKUPS_DIR_PATH } from "../constants";
 
 const SERVER_NAME_OPTION = "server-name";
 const BACKUP_OPTION = "backup";
@@ -148,7 +149,7 @@ export const backupRestore = {
 			}
 
 			const backupFileName = `${formatTimestampForFilename(backupToRestore)}.tar.gz`;
-			const backupFilePath = `/app/data/backups/${server.id}/${backupFileName}`;
+			const backupFilePath = `${BACKUPS_DIR_PATH}/${server.id}/${backupFileName}`;
 			const backupStream = createReadStream(backupFilePath);
 			const gunzip = createGunzip();
 

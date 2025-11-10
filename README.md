@@ -17,6 +17,7 @@ A Discord bot for managing Minecraft servers directly from Discord.
 - [Bun](https://bun.sh/)
 - [discord.js](https://discord.js.org/)
 - [Docker](https://www.docker.com/) ([Dockerode](https://github.com/apocas/dockerode))
+- [Sharp](https://sharp.pixelplumbing.com/) (Image processing)
 
 ## Installation and Usage
 
@@ -151,6 +152,7 @@ Edits an existing server's configuration. The server must be stopped before edit
 
 **Options:**
 - `server-name` (required) - Name of the server to edit
+- `icon` (optional) - New server icon image (automatically resized to 64x64)
 - `description` (optional) - New server description
 - `max-players` (optional) - New maximum players (1-100)
 - `gamemode` (optional) - New game mode
@@ -260,14 +262,13 @@ Configuration settings can be modified in `src/config.ts`:
 - `port` - Port number for Minecraft servers (default: 25565)
 - `maxServerCount` - Maximum number of servers allowed (default: 10)
 - `maxTotalBackupCount` - Maximum total backups across all servers (default: 50)
-- `maxBackupCountPerServer` - Maximum backups per server (default: 5)
-- `overrideOldBackups` - Auto-delete oldest backups when limit is reached (default: false)
+- `maxBackupCountPerServer` - Maximum backups per server (default: 7)
+- `overrideOldBackups` - Auto-delete oldest backups when limit is reached (default: true)
 
 ## Development
 
 ```bash
 bun run dev          # Development mode with hot reload
-bun run db:push      # Apply database schema
 bun run cmd:deploy   # Deploy Discord commands
 bun run biome:check  # Lint and format code
 ```

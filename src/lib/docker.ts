@@ -68,7 +68,7 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 		return value;
 	};
 
-  const server: Server = {
+	const server: Server = {
 		id: getValue("id"),
 		ownerId: getValue("ownerId"),
 		name: getValue("name"),

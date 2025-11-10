@@ -138,7 +138,9 @@ export const start = {
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Started Successfully!`,
-				embeds: [createServerInfoEmbed(server, { attachment: serverIconAttachment })],
+				embeds: [
+					createServerInfoEmbed(server, { attachment: serverIconAttachment }),
+				],
 				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {

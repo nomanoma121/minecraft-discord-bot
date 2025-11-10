@@ -6,7 +6,12 @@ import {
 } from "discord.js";
 import sharp from "sharp";
 import { Config } from "../config";
-import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE, SERVER_DEFAULT_ICON_URL } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	DIFFICULTY,
+	GAMEMODE,
+	SERVER_DEFAULT_ICON_URL,
+} from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
@@ -118,10 +123,17 @@ export const edit = {
 		const difficulty = interaction.options.getString(
 			"difficulty",
 		) as Difficulty | null;
-		const version = interaction.options.getString("version");		
+		const version = interaction.options.getString("version");
 		const iconAttachment = interaction.options.getAttachment("icon");
 
-		if (!description && !maxPlayers && !gamemode && !difficulty && !version && !iconAttachment) {
+		if (
+			!description &&
+			!maxPlayers &&
+			!gamemode &&
+			!difficulty &&
+			!version &&
+			!iconAttachment
+		) {
 			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(

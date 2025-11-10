@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createSuccessEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -38,6 +38,8 @@ export const stop = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
@@ -45,8 +47,6 @@ export const stop = {
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 
@@ -67,7 +67,6 @@ export const stop = {
 				return;
 			}
 
-			const server = parseLabels(container.Labels);
 			const containerInstance = docker.getContainer(container.Id);
 
 			const isRunning = container.State === "running";
@@ -80,31 +79,10 @@ export const stop = {
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n⌛ Stopping Minecraft Server...`,
-			);
-
 			await containerInstance.stop();
 			console.log(`Minecraft server "${serverName}" stopped.`);
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n✅ Stop Minecraft Server\n\n`,
-			);
-
-			const embed = new EmbedBuilder()
-				.setTitle(`Minecraft Server "${serverName}" Stopped`)
-				.setColor(EMBED_COLORS.SUCCESS)
-				.setDescription(
-					`The Minecraft server "${serverName}" has been stopped successfully.`,
-				)
-				.addFields(
-					{ name: "Server Name", value: server.name, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "Use /start to start your server again." });
-
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [createSuccessEmbed("Server stopped successfully.")] });
 		} catch (error) {
 			console.error("Error stopping the Minecraft server:", error);
 			await interaction.editReply({

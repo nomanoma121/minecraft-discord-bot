@@ -33,3 +33,6 @@ export const DEFAULT_MAX_PLAYERS = 20;
 export const AUTOCOMPLETE_MAX_CHOICES = 25;
 
 export const COMMAND_TIMEOUT_MS = 6 * 60 * 1000;
+
+export const SERVER_DEFAULT_ICON_URL =
+	"https://minecraft.wiki/images/Grass_Block_JE7_BE6.png";

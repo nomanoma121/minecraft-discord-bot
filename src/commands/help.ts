@@ -12,6 +12,8 @@ export const help = {
 		.setDescription("Shows all available commands and their descriptions"),
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const embed = new EmbedBuilder()
 			.setTitle("Minecraft Discord Bot - Commands")
 			.setColor(EMBED_COLORS.INFO)

@@ -17,10 +17,11 @@ import {
 	labelBuilder,
 	parseLabels,
 } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createServerInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
 import { getAllServers } from "../utils";
+import { create } from "./create";
 
 export const edit = {
 	name: "edit",
@@ -94,6 +95,8 @@ export const edit = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
@@ -131,8 +134,6 @@ export const edit = {
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 
@@ -176,10 +177,6 @@ export const edit = {
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n⌛ Updating configuration...`,
-			);
-
 			const updatedServer: Server = { ...server, updatedAt: new Date() };
 
 			if (description) updatedServer.description = description;
@@ -220,40 +217,7 @@ export const edit = {
 				},
 			});
 
-			const embed = new EmbedBuilder()
-				.setTitle(`Server "${serverName}" Updated`)
-				.setColor(EMBED_COLORS.SUCCESS)
-				.setDescription(
-					"The server configuration has been updated successfully.\n\n**Note:** You need to restart the server for changes to take effect.",
-				)
-				.addFields(
-					{ name: "Server Name", value: updatedServer.name, inline: true },
-					{ name: "Version", value: updatedServer.version, inline: true },
-					{
-						name: "Gamemode",
-						value: updatedServer.gamemode,
-						inline: true,
-					},
-					{
-						name: "Difficulty",
-						value: updatedServer.difficulty,
-						inline: true,
-					},
-					{
-						name: "Max Players",
-						value: updatedServer.maxPlayers.toString(),
-						inline: true,
-					},
-					{
-						name: "Description",
-						value: updatedServer.description || "N/A",
-						inline: false,
-					},
-					{ name: "Owner", value: `<@${updatedServer.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "Restart the server to apply changes" });
-
-			await interaction.editReply({ content: "", embeds: [embed] });
+			await interaction.editReply({ content: "", embeds: [createServerInfoEmbed(updatedServer)] });
 		} catch (error) {
 			console.error("Error editing server:", error);
 			await interaction.editReply({

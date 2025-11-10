@@ -36,6 +36,11 @@ export const formatDateForDisplay = (date: Date): string => {
 	return `${year}-${month}-${day} ${hour}:${minute}`;
 };
 
+
+export const formatUptime = (date: string): string => {
+	const 
+}
+
 export const getAllServers = async () => {
 	const containers = await docker.listContainers({
 		all: true,

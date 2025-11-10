@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createSuccessEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -39,6 +39,8 @@ const deleteCommand = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
@@ -91,33 +93,12 @@ const deleteCommand = {
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n⌛ Removing server...`,
-			);
-
 			const containerInstance = docker.getContainer(container.Id);
 
 			await containerInstance.remove({ v: true });
 			await rm(`/backups/${server.id}`, { recursive: true, force: true });
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n✅ Remove server\n\n`,
-			);
-
-			const embed = new EmbedBuilder()
-				.setTitle(`Minecraft Server "${serverName}" Deleted`)
-				.setColor(EMBED_COLORS.SUCCESS)
-				.setDescription(
-					`The Minecraft server "${serverName}" has been deleted successfully.`,
-				)
-				.addFields(
-					{ name: "Server Name", value: server.name, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "All data for this server has been removed." });
-
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [createSuccessEmbed(`Minecraft server "${serverName}" deleted successfully.`)] });
 		} catch (error) {
 			console.error("Error deleting the Minecraft server:", error);
 			await interaction.editReply({

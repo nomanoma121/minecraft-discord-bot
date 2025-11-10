@@ -8,7 +8,7 @@ import {
 import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import {
 	formatDateForDisplay,
@@ -82,6 +82,8 @@ export const backupRestore = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString(SERVER_NAME_OPTION);
 		const backupTimestamp = interaction.options.getString(BACKUP_OPTION);
 		if (!serverName || !backupTimestamp) {
@@ -120,10 +122,6 @@ export const backupRestore = {
 			return;
 		}
 
-		await interaction.reply(
-			`⌛ Restoring backup for server "${serverName}"...`,
-		);
-
 		const release = await mutex.acquire();
 
 		try {
@@ -159,9 +157,11 @@ export const backupRestore = {
 					.catch(reject);
 			});
 
-			await interaction.editReply(
-				`✅ Backup restored successfully for server "${serverName}".`,
-			);
+			await interaction.editReply({
+				embeds: [
+					createInfoEmbed(`Backup "${formatDateForDisplay(backupToRestore)}" restored successfully for server "${serverName}".`),
+				],
+			});
 		} catch (error) {
 			if (!(error instanceof Error)) {
 				throw error;

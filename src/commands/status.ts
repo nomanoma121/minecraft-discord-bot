@@ -1,14 +1,14 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
 import type Dockerode from "dockerode";
-import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { docker } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { getAllServers, getServerByName } from "../utils";
+import { createServerInfoEmbed } from "../lib/embed";
 
 export const status = {
 	name: "status",
@@ -38,6 +38,8 @@ export const status = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+		
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
@@ -78,18 +80,7 @@ export const status = {
 			const isRunning = containerInfo.State.Running;
 			const statusText = isRunning ? "Running" : "Stopped";
 
-			const embed = new EmbedBuilder()
-				.setTitle(`Status of Minecraft Server: ${serverName}`)
-				.setColor(isRunning ? EMBED_COLORS.SUCCESS : EMBED_COLORS.ERROR)
-				.addFields(
-					{ name: "Status", value: statusText, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Gamemode", value: server.gamemode, inline: true },
-					{ name: "Difficulty", value: server.difficulty, inline: true },
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				);
-
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [createServerInfoEmbed(server, statusText)] });
 		} catch (error) {
 			console.error("Error checking server status:", error);
 			await interaction.editReply({

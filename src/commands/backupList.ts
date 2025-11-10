@@ -1,11 +1,12 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
+	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { getExistingBackups } from "../lib/backup";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
 import { formatDateForDisplay, getAllServers, getServerByName } from "../utils";
 
 export const backupList = {
@@ -39,6 +40,7 @@ export const backupList = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
@@ -49,27 +51,29 @@ export const backupList = {
 
 		const server = await getServerByName(serverName);
 		if (!server) {
-			await interaction.reply(`No server found with the name "${serverName}".`);
+			await interaction.editReply({
+				embeds: [createInfoEmbed(`No server found with the name "${serverName}".`)],
+			});
 			return;
 		}
 
 		const backups = await getExistingBackups(server.id);
 		if (backups.length === 0) {
-			await interaction.reply(`No backups found for server "${serverName}".`);
+			await interaction.editReply({
+				embeds: [createInfoEmbed(`No backups found for server "${serverName}".`)],
+			});
 			return;
 		}
 
 		const backupList = backups
-			.map((backup, i) => {
-				const formattedTimestamp = formatDateForDisplay(backup);
-				if (i === 0) {
-					return `${formattedTimestamp} (Latest)`;
-				}
-				return formattedTimestamp;
-			})
+			.map((backup) => `- ${formatDateForDisplay(backup)}`)
 			.join("\n");
-		await interaction.reply(
-			`Backups for server "${serverName}":\n${backupList}`,
-		);
+
+		const embed = new EmbedBuilder()
+			.setTitle(`Backups for server "${serverName}"`)
+			.setColor(EMBED_COLORS.INFO)
+			.setDescription(backupList);
+
+		await interaction.editReply({ embeds: [embed] });
 	},
 };

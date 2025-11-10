@@ -15,9 +15,10 @@ import {
 	withSafeSave,
 } from "../lib/backup";
 import { docker } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createSuccessEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import {
+	formatDateForDisplay,
 	formatTimestampForFilename,
 	getAllServers,
 	getServerByName,
@@ -51,6 +52,8 @@ export const backupCreate = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.reply({
@@ -85,8 +88,6 @@ export const backupCreate = {
 			return;
 		}
 
-		await interaction.reply(`⌛ Creating backup for server "${serverName}"...`);
-
 		const release = await mutex.acquire();
 
 		try {
@@ -100,8 +101,9 @@ export const backupCreate = {
 				return;
 			}
 
+			const now = new Date();
 			await withSafeSave(container, async () => {
-				const timestamp = formatTimestampForFilename(new Date());
+				const timestamp = formatTimestampForFilename(now);
 				const backupFileName = `${timestamp}.tar.gz`;
 				const backupFilePath = `/backups/${server.id}/${backupFileName}`;
 
@@ -116,9 +118,11 @@ export const backupCreate = {
 				await pipeline(archive, gzip, writeStream);
 			});
 
-			await interaction.editReply(
-				`✅ Backup for server "${serverName}" created successfully.`,
-			);
+			await interaction.editReply({ embeds: [
+				createSuccessEmbed(
+					`Backup "${formatDateForDisplay(now)}" created successfully for server ${serverName}.`
+				)
+			]})
 		} catch (error) {
 			console.error("Error creating backup:", error);
 			await interaction.editReply({

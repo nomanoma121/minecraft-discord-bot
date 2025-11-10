@@ -1,8 +1,11 @@
 import {
 	type ChatInputCommandInteraction,
+	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
+import { server } from "typescript";
 import { Config } from "../config";
+import { EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
 import { getRunningServers } from "../utils";
@@ -14,8 +17,8 @@ export const list = {
 		.setDescription("Lists all Minecraft servers"),
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		await interaction.reply("⌛ Fetching server list...");
-
+		await interaction.deferReply();
+		
 		try {
 			const containers = await docker.listContainers({
 				all: true,
@@ -26,21 +29,32 @@ export const list = {
 			const servers = containers.map((c) => parseLabels(c.Labels));
 			const runningServers = await getRunningServers();
 
-			let message = `**Minecraft Servers (${servers.length}/${Config.maxServerCount}):**\n\n`;
+			const embed = new EmbedBuilder()
+				.setTitle("All Servers")
+				.setColor(EMBED_COLORS.SUCCESS);
+
+			let description = "";
 
 			for (const server of servers) {
+				let status = "";
 				const isRunning = runningServers.some((s) => s.id === server.id);
-				const statusText = isRunning ? "Running" : "Stopped";
-
-				message += `- **${server.name}** - ${statusText}\n`;
-				message += `   Version: ${server.version} | Gamemode: ${server.gamemode} | Difficulty: ${server.difficulty}\n`;
-				if (server.description) {
-					message += `   Description: ${server.description}\n`;
-				}
-				message += `   Owner: <@${server.ownerId}>\n\n`;
+				status = isRunning ? "Running" : "Stopped";
+				const container = docker.getContainer(server.id);
+				const containerInfo = await container.inspect();
+				status += isRunning
+					? `${containerInfo.State.StartedAt}`
+					: `${containerInfo.State.FinishedAt}`;
+				description += `- **${server.name}** (owner: <@${server.ownerId}>) - ${status}\n`;
 			}
 
-			await interaction.editReply(message);
+			if (servers.length === 0) {
+				description =
+					"No servers found. Use `/create` to create your first server!";
+			}
+
+			embed.setDescription(description);
+
+			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
 			console.error("Error listing servers:", error);
 			await interaction.editReply({

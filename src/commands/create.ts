@@ -20,6 +20,7 @@ import {
 import { createErrorEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, ServerType } from "../types/server";
+import { createServerInfoEmbed } from "../lib/embed";
 
 export const create = {
 	name: "create",
@@ -87,7 +88,7 @@ export const create = {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		await interaction.reply("⏳ Creating Minecraft Server...");
+		await interaction.deferReply();
 
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
@@ -205,29 +206,8 @@ export const create = {
 			});
 			console.log("Minecraft server container created.");
 
-			const embed = new EmbedBuilder()
-				.setTitle("Created Server Information")
-				.setColor(EMBED_COLORS.SUCCESS)
-				.addFields(
-					{ name: "Server Name", value: server.name, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Gamemode", value: server.gamemode, inline: true },
-					{ name: "Difficulty", value: server.difficulty, inline: true },
-					{
-						name: "Max Players",
-						value: server.maxPlayers.toString(),
-						inline: true,
-					},
-					{
-						name: "Description",
-						value: server.description || "N/A",
-						inline: false,
-					},
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "Use /start to start your server." });
-			await interaction.editReply("✅ Minecraft server created successfully!");
-			await interaction.editReply({ embeds: [embed] });
+
+			await interaction.editReply({ embeds: [createServerInfoEmbed(server)] });
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);
 			await interaction.editReply({

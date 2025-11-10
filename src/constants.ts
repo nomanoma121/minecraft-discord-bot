@@ -55,4 +55,4 @@ export const ICONS_DIR_PATH = "/app/data/icons";
 
 export const MINECRAFT_SERVER_IMAGE = "itzg/minecraft-server";
 
-export const ICONS_VOLUME_NAME = "icons";
+export const ICONS_VOLUME_NAME = "minecraft-discord-bot_icons";

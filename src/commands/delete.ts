@@ -99,7 +99,8 @@ const deleteCommand = {
 			const containerInstance = docker.getContainer(container.Id);
 
 			await containerInstance.remove({ v: true });
-			await rm(`/backups/${server.id}`, { recursive: true, force: true });
+			await rm(`/app/data/backups/${server.id}`, { recursive: true, force: true });
+			await rm(`/app/data/icons/${server.id}.png`, { force: true });
 
 			await interaction.editReply({
 				content: "",

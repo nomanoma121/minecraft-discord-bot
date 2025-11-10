@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { rm } from "node:fs/promises";
 import { finished } from "node:stream/promises";
 import type Dockerode from "dockerode";
 import { parseTimestampFromFilename } from "../utils.js";
@@ -85,5 +86,21 @@ export const getTotalBackupCounts = async (): Promise<number> => {
 	} catch (error) {
 		console.error("Error reading backups directory:", error);
 		return 0;
+	}
+};
+
+export const deleteOldestBackups = async (serverId: string): Promise<void> => {
+	const backupsDir = `/app/data/backups/${serverId}`;
+	try {
+		const files = await fs.promises.readdir(backupsDir);
+		const backupFiles = files.filter((file) => file.endsWith(".tar.gz")).sort();
+		if (backupFiles.length === 0) return;
+
+		const oldestBackupFile = backupFiles[0];
+		const oldestBackupPath = `${backupsDir}/${oldestBackupFile}`;
+		await rm(oldestBackupPath);
+		console.log(`Deleted oldest backup: ${oldestBackupPath}`);
+	} catch (error) {
+		throw new Error(`Error deleting oldest backup: ${error}`);
 	}
 };

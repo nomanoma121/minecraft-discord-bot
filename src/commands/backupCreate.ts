@@ -10,6 +10,7 @@ import {
 import { Config } from "../config";
 import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import {
+	deleteOldestBackups,
 	getExistingBackups,
 	getTotalBackupCounts,
 	withSafeSave,
@@ -82,14 +83,41 @@ export const backupCreate = {
 			totalBackupCounts >= Config.maxTotalBackupCount ||
 			serverBackups.length >= Config.maxBackupCountPerServer
 		) {
-			await interaction.editReply({
-				embeds: [
-					createInfoEmbed(
-						`Backup limit reached. Max total backups: ${Config.maxTotalBackupCount}, Max backups per server: ${Config.maxBackupCountPerServer}. Please delete old backups before creating new ones.`,
-					),
-				],
-			});
-			return;
+			if (!Config.overrideOldBackups) {
+				await interaction.editReply({
+					embeds: [
+						createInfoEmbed(
+							`Backup limit reached. Max total backups: ${Config.maxTotalBackupCount}, Max backups per server: ${Config.maxBackupCountPerServer}. Please delete old backups before creating new ones.`,
+						),
+					],
+				});
+				return;
+			}
+
+			if (!serverBackups.length) {
+				await interaction.editReply({
+					embeds: [
+						createInfoEmbed(
+							`Cannot create new backup because the total backup count has reached the limit of **${Config.maxTotalBackupCount}**. Please delete old backups for other servers first.`,
+						),
+					],
+				});
+				return;
+			}
+
+			try {
+				await deleteOldestBackups(server.id);
+			} catch (error) {
+				console.error("Error deleting oldest backup:", error);
+				await interaction.editReply({
+					embeds: [
+						createErrorEmbed(
+							`Failed to delete oldest backup to make space for new backup.`,
+						),
+					],
+				});
+				return;
+			}
 		}
 
 		const release = await mutex.acquire();

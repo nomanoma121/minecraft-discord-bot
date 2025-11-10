@@ -1,5 +1,4 @@
 import {
-	Attachment,
 	AttachmentBuilder,
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,

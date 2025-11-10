@@ -4,6 +4,7 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
+import sharp from "sharp";
 import { Config } from "../config";
 import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE } from "../constants";
 import {
@@ -20,7 +21,6 @@ import {
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
 import { getAllServers, saveIconImage } from "../utils";
-import sharp from "sharp";
 
 export const edit = {
 	name: "edit",
@@ -190,9 +190,12 @@ export const edit = {
 				serverIconAttachment = new AttachmentBuilder(resizedImageBuffer, {
 					name: `${server.id}.png`,
 				});
-				updatedServer.iconPath = await saveIconImage(server.id, resizedImageBuffer);
+				updatedServer.iconPath = await saveIconImage(
+					server.id,
+					resizedImageBuffer,
+				);
 			}
-			
+
 			if (container.State === "running") {
 				await interaction.editReply({
 					embeds: [
@@ -246,7 +249,11 @@ export const edit = {
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Updated Successfully!`,
-				embeds: [createServerInfoEmbed(updatedServer, { attachment: serverIconAttachment })],
+				embeds: [
+					createServerInfoEmbed(updatedServer, {
+						attachment: serverIconAttachment,
+					}),
+				],
 				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {

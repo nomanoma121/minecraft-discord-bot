@@ -1,6 +1,6 @@
 import type { AttachmentBuilder } from "discord.js";
 import { EmbedBuilder } from "discord.js";
-import { EMBED_COLORS, SERVER_DEFAULT_ICON_URL } from "../constants";
+import { EMBED_COLORS } from "../constants";
 import type { Server } from "../types/server";
 
 export const createErrorEmbed = (errorMessage: string) => {

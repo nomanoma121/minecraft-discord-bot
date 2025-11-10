@@ -60,7 +60,7 @@ export const backupCreate = {
 
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
@@ -68,7 +68,7 @@ export const backupCreate = {
 
 		const server = await getServerByName(serverName);
 		if (!server) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(`No server found with the name "${serverName}".`),
 				],
@@ -82,7 +82,7 @@ export const backupCreate = {
 			totalBackupCounts >= Config.maxTotalBackupCount ||
 			serverBackups.length >= Config.maxBackupCountPerServer
 		) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
 						`Backup limit reached. Max total backups: ${Config.maxTotalBackupCount}, Max backups per server: ${Config.maxBackupCountPerServer}. Please delete old backups before creating new ones.`,

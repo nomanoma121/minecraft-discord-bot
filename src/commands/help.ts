@@ -88,6 +88,6 @@ export const help = {
 				text: "Use /create to get started with your first server!",
 			});
 
-		await interaction.reply({ embeds: [embed] });
+		await interaction.editReply({ embeds: [embed] });
 	},
 };

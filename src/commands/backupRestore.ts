@@ -87,7 +87,7 @@ export const backupRestore = {
 		const serverName = interaction.options.getString(SERVER_NAME_OPTION);
 		const backupTimestamp = interaction.options.getString(BACKUP_OPTION);
 		if (!serverName || !backupTimestamp) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
 					createInfoEmbed("Server name and backup timestamp are required."),
 				],
@@ -97,7 +97,7 @@ export const backupRestore = {
 
 		const server = await getServerByName(serverName);
 		if (!server) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(`No server found with the name "${serverName}".`),
 				],
@@ -105,7 +105,7 @@ export const backupRestore = {
 			return;
 		}
 		if (server.ownerId !== interaction.user.id) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
 						`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,
@@ -120,7 +120,7 @@ export const backupRestore = {
 			(backup) => backup.toString() === backupTimestamp,
 		);
 		if (!backupToRestore) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
 						`No backup found with the timestamp "${backupTimestamp}" for server "${serverName}".`,

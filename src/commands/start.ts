@@ -48,7 +48,7 @@ export const start = {
 
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;

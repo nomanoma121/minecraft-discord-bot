@@ -96,7 +96,7 @@ export const edit = {
 
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
@@ -113,21 +113,19 @@ export const edit = {
 		const version = interaction.options.getString("version");
 
 		if (!description && !maxPlayers && !gamemode && !difficulty && !version) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
 						"Please provide at least one field to update (description, max-players, gamemode, or difficulty).",
 					),
 				],
-				ephemeral: true,
 			});
 			return;
 		}
 
 		if (maxPlayers && (maxPlayers < 1 || maxPlayers > 100)) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [createInfoEmbed("Max players must be between 1 and 100.")],
-				ephemeral: true,
 			});
 			return;
 		}

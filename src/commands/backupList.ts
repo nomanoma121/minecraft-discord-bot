@@ -43,7 +43,7 @@ export const backupList = {
 		await interaction.deferReply();
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;

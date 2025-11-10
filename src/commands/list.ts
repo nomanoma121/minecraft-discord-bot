@@ -6,7 +6,7 @@ import {
 import { EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
-import { getRunningServers, formatUptime } from "../utils";
+import { formatUptime, getRunningServers } from "../utils";
 
 export const list = {
 	name: "list",
@@ -40,9 +40,9 @@ export const list = {
 				const container = docker.getContainer(server.id);
 				const containerInfo = await container.inspect();
 				status += isRunning
-					? `${containerInfo.State.StartedAt}`
-					: `${containerInfo.State.FinishedAt}`;
-				description += `- **${server.name}** (owner: <@${server.ownerId}>) - ${formatUptime(status)}\n`;
+					? ` ${formatUptime(containerInfo.State.StartedAt)}`
+					: ` ${formatUptime(containerInfo.State.FinishedAt)}`;
+				description += `- **${server.name}** (owner: <@${server.ownerId}>) - ${status} \n`;
 			}
 
 			if (servers.length === 0) {

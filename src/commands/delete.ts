@@ -46,13 +46,11 @@ const deleteCommand = {
 
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 

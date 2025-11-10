@@ -51,7 +51,7 @@ export const withSafeSave = async (
 };
 
 export const getExistingBackups = async (serverId: string): Promise<Date[]> => {
-	const backupsDir = `/backups/${serverId}`;
+	const backupsDir = `/app/data/backups/${serverId}`;
 	try {
 		const files = await fs.promises.readdir(backupsDir);
 		const filtered = files
@@ -68,7 +68,7 @@ export const getExistingBackups = async (serverId: string): Promise<Date[]> => {
 };
 
 export const getTotalBackupCounts = async (): Promise<number> => {
-	const backupsRootDir = `/backups`;
+	const backupsRootDir = `/app/data/backups`;
 	try {
 		const serverDirs = await fs.promises.readdir(backupsRootDir);
 		let totalCount = 0;

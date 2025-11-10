@@ -38,7 +38,7 @@ export const OPTIONS = {
 	SERVER_TYPE: "server-type",
 	ICON: "icon",
 	BACKUP: "backup",
-};
+} as const;
 
 export const DEFAULT_MAX_PLAYERS = 20;
 

@@ -1,5 +1,6 @@
 import { docker, filterLabelBuilder, parseLabels } from "./lib/docker";
 import type { Server } from "./types/server";
+import fs from "node:fs";
 
 /**
  * Formats a Date object into a filename-safe timestamp string.
@@ -112,3 +113,11 @@ export const getRunningServers = async (): Promise<Server[]> => {
 	const servers = containers.map((c) => parseLabels(c.Labels));
 	return servers;
 };
+
+export const saveIconImage = async (serverId: string, imageBuffer: Buffer): Promise<string> => {
+	const iconsDir = `/app/data/icons`;
+	await fs.promises.mkdir(iconsDir, { recursive: true });
+	const iconPath = `${iconsDir}/${serverId}.png`;
+	await fs.promises.writeFile(iconPath, imageBuffer);
+	return iconPath;
+}

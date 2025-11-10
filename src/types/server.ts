@@ -15,6 +15,7 @@ export type Server = {
 	ownerId: string;
 	name: string;
 	version: string;
+	iconPath?: string;
 	maxPlayers: string;
 	difficulty: Difficulty;
 	type: ServerType;

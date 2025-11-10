@@ -85,7 +85,7 @@ export const status = {
 			const status = `${isRunning ? "Running" : "Stopped"} ${uptime}`;
 
 			await interaction.editReply({
-				embeds: [createServerInfoEmbed(server, status)],
+				embeds: [createServerInfoEmbed(server, { status })],
 			});
 		} catch (error) {
 			console.error("Error checking server status:", error);

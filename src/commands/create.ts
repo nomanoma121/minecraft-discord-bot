@@ -209,9 +209,9 @@ export const create = {
 			});
 			console.log("Minecraft server container created.");
 
-			await interaction.editReply({ 
+			await interaction.editReply({
 				content: `✅ Server **${serverName}** Created Successfully!`,
-				embeds: [createServerInfoEmbed(server)] 
+				embeds: [createServerInfoEmbed(server)],
 			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);

@@ -79,8 +79,9 @@ export const status = {
 				return;
 			}
 			const isRunning = containerInfo.State.Running;
-			const uptime = isRunning ?
-				formatUptime(containerInfo.State.StartedAt) : formatUptime(containerInfo.State.FinishedAt);
+			const uptime = isRunning
+				? formatUptime(containerInfo.State.StartedAt)
+				: formatUptime(containerInfo.State.FinishedAt);
 			const status = `${isRunning ? "Running" : "Stopped"} ${uptime}`;
 
 			await interaction.editReply({

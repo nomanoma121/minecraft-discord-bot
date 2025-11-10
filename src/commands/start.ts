@@ -67,7 +67,9 @@ export const start = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createInfoEmbed(`Server with name **${serverName}** does not exist.`),
+						createInfoEmbed(
+							`Server with name **${serverName}** does not exist.`,
+						),
 					],
 				});
 				return;
@@ -90,7 +92,9 @@ export const start = {
 			const containerInstance = docker.getContainer(container.Id);
 			await containerInstance.start();
 
-			await interaction.editReply("⌛ Waiting for the server to become healthy...");
+			await interaction.editReply(
+				"⌛ Waiting for the server to become healthy...",
+			);
 
 			const startTime = Date.now();
 			let isHealthy = false;
@@ -124,9 +128,9 @@ export const start = {
 
 			const server = parseLabels(container.Labels);
 
-			await interaction.editReply({ 
+			await interaction.editReply({
 				content: `✅ Server **${serverName}** Started Successfully!`,
-				embeds: [createServerInfoEmbed(server)]
+				embeds: [createServerInfoEmbed(server)],
 			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);

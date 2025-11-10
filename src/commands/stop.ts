@@ -89,7 +89,9 @@ export const stop = {
 
 			await interaction.editReply({
 				content: "",
-				embeds: [createSuccessEmbed(`Server **${serverName}** stopped successfully.`)],
+				embeds: [
+					createSuccessEmbed(`Server **${serverName}** stopped successfully.`),
+				],
 			});
 		} catch (error) {
 			console.error("Error stopping the Minecraft server:", error);

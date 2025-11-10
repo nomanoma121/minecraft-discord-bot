@@ -30,16 +30,16 @@ export const createServerInfoEmbed = (server: Server, status?: string) => {
 		.setDescription(server.description)
 		.setThumbnail(SERVER_DEFAULT_ICON_URL)
 		.addFields(
-			{ name: "Version", value: server.version },
-			{ name: "Server Type", value: server.type },
-			{ name: "Gamemode", value: server.gamemode },
-			{ name: "Difficulty", value: server.difficulty },
-			{ name: "Owner", value: `<@${server.ownerId}>` },
-			{ name: "Max Player", value: server.maxPlayers },
+			{ name: "Version", value: server.version, inline: true },
+			{ name: "Server Type", value: server.type, inline: true },
+			{ name: "Gamemode", value: server.gamemode, inline: true },
+			{ name: "Difficulty", value: server.difficulty, inline: true },
+			{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
+			{ name: "Max Player", value: server.maxPlayers, inline: true },
 		);
 
 	if (status) {
-		embed.setFields({ name: "Status", value: status });
+		embed.addFields({ name: "Status", value: status, inline: true });
 	}
 
 	return embed;

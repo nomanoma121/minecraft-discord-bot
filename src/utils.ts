@@ -45,9 +45,14 @@ export const formatUptime = (dateString: string): string => {
 		return "Not started";
 	}
 
+	// check zero date (0001-01-01T00:00:00Z)
+	if (startTime.getFullYear() === 1) {
+		return "Not started";
+	}
+
 	const diffMs = now.getTime() - startTime.getTime();
 
-	// Not started yet (future date or zero date like 0001-01-01)
+	// Not started yet (future date)
 	if (diffMs <= 0) {
 		return "Not started";
 	}

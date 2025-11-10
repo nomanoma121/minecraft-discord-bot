@@ -11,7 +11,7 @@ import {
 	createInfoEmbed,
 	createServerInfoEmbed,
 } from "../lib/embed";
-import { getAllServers, getServerByName } from "../utils";
+import { formatUptime, getAllServers, getServerByName } from "../utils";
 
 export const status = {
 	name: "status",
@@ -79,10 +79,12 @@ export const status = {
 				return;
 			}
 			const isRunning = containerInfo.State.Running;
-			const statusText = isRunning ? "Running" : "Stopped";
+			const uptime = isRunning ?
+				formatUptime(containerInfo.State.StartedAt) : formatUptime(containerInfo.State.FinishedAt);
+			const status = `${isRunning ? "Running" : "Stopped"} ${uptime}`;
 
 			await interaction.editReply({
-				embeds: [createServerInfoEmbed(server, statusText)],
+				embeds: [createServerInfoEmbed(server, status)],
 			});
 		} catch (error) {
 			console.error("Error checking server status:", error);

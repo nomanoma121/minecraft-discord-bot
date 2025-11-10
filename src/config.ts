@@ -3,4 +3,5 @@ export const Config = {
 	maxServerCount: 10,
 	maxBackupCountPerServer: 7,
 	maxTotalBackupCount: 50,
+	overrideOldBackups: true,
 };

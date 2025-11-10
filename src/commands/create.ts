@@ -144,7 +144,8 @@ export const create = {
 				(interaction.options.getString(OPTIONS.GAMEMODE) as Gamemode) ||
 				GAMEMODE.SURVIVAL,
 			description:
-				interaction.options.getString(OPTIONS.DESCRIPTION) || "A Minecraft server",
+				interaction.options.getString(OPTIONS.DESCRIPTION) ||
+				"A Minecraft server",
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};

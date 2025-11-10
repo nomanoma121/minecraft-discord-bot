@@ -8,7 +8,11 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import { AUTOCOMPLETE_MAX_CHOICES, BACKUPS_DIR_PATH, OPTIONS } from "../constants";
+import {
+	AUTOCOMPLETE_MAX_CHOICES,
+	BACKUPS_DIR_PATH,
+	OPTIONS,
+} from "../constants";
 import {
 	deleteOldestBackups,
 	getExistingBackups,

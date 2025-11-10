@@ -1,16 +1,15 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import {
-	AUTOCOMPLETE_MAX_CHOICES,
-	EMBED_COLORS,
-	HEALTH_STATUS,
-} from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, HEALTH_STATUS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed, createInfoEmbed, createServerInfoEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createServerInfoEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers, getRunningServers } from "../utils";
 

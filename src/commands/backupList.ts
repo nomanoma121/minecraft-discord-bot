@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
 import { getExistingBackups } from "../lib/backup";
-import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
+import { createInfoEmbed } from "../lib/embed";
 import { formatDateForDisplay, getAllServers, getServerByName } from "../utils";
 
 export const backupList = {
@@ -52,7 +52,9 @@ export const backupList = {
 		const server = await getServerByName(serverName);
 		if (!server) {
 			await interaction.editReply({
-				embeds: [createInfoEmbed(`No server found with the name "${serverName}".`)],
+				embeds: [
+					createInfoEmbed(`No server found with the name "${serverName}".`),
+				],
 			});
 			return;
 		}
@@ -60,7 +62,9 @@ export const backupList = {
 		const backups = await getExistingBackups(server.id);
 		if (backups.length === 0) {
 			await interaction.editReply({
-				embeds: [createInfoEmbed(`No backups found for server "${serverName}".`)],
+				embeds: [
+					createInfoEmbed(`No backups found for server "${serverName}".`),
+				],
 			});
 			return;
 		}

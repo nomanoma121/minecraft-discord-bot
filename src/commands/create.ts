@@ -1,13 +1,11 @@
 import {
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
 import {
 	DEFAULT_MAX_PLAYERS,
 	DIFFICULTY,
-	EMBED_COLORS,
 	GAMEMODE,
 	SERVER_TYPE,
 } from "../constants";
@@ -17,10 +15,13 @@ import {
 	labelBuilder,
 	parseLabels,
 } from "../lib/docker";
-import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createServerInfoEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, ServerType } from "../types/server";
-import { createServerInfoEmbed } from "../lib/embed";
 
 export const create = {
 	name: "create",
@@ -205,7 +206,6 @@ export const create = {
 				},
 			});
 			console.log("Minecraft server container created.");
-
 
 			await interaction.editReply({ embeds: [createServerInfoEmbed(server)] });
 		} catch (error) {

@@ -35,12 +35,12 @@ export const createServerInfoEmbed = (server: Server, status?: string) => {
 			{ name: "Gamemode", value: server.gamemode },
 			{ name: "Difficulty", value: server.difficulty },
 			{ name: "Owner", value: `<@${server.ownerId}>` },
-			{ name: "Max Player", value: server.maxPlayers }
-		)
+			{ name: "Max Player", value: server.maxPlayers },
+		);
 
 	if (status) {
-		embed.setFields({ name: "Status", value: status })
+		embed.setFields({ name: "Status", value: status });
 	}
-	
+
 	return embed;
-}
+};

@@ -2,12 +2,15 @@ import { rm } from "node:fs/promises";
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed, createSuccessEmbed, createInfoEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createSuccessEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -98,7 +101,13 @@ const deleteCommand = {
 			await containerInstance.remove({ v: true });
 			await rm(`/backups/${server.id}`, { recursive: true, force: true });
 
-			await interaction.editReply({ embeds: [createSuccessEmbed(`Minecraft server "${serverName}" deleted successfully.`)] });
+			await interaction.editReply({
+				embeds: [
+					createSuccessEmbed(
+						`Minecraft server "${serverName}" deleted successfully.`,
+					),
+				],
+			});
 		} catch (error) {
 			console.error("Error deleting the Minecraft server:", error);
 			await interaction.editReply({

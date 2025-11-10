@@ -1,23 +1,21 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import {
-	AUTOCOMPLETE_MAX_CHOICES,
-	DIFFICULTY,
-	EMBED_COLORS,
-	GAMEMODE,
-} from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE } from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
 	labelBuilder,
 	parseLabels,
 } from "../lib/docker";
-import { createErrorEmbed, createServerInfoEmbed, createInfoEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createServerInfoEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
 import { getAllServers } from "../utils";
@@ -216,7 +214,10 @@ export const edit = {
 				},
 			});
 
-			await interaction.editReply({ content: "", embeds: [createServerInfoEmbed(updatedServer)] });
+			await interaction.editReply({
+				content: "",
+				embeds: [createServerInfoEmbed(updatedServer)],
+			});
 		} catch (error) {
 			console.error("Error editing server:", error);
 			await interaction.editReply({

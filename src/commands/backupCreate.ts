@@ -15,7 +15,11 @@ import {
 	withSafeSave,
 } from "../lib/backup";
 import { docker } from "../lib/docker";
-import { createErrorEmbed, createSuccessEmbed, createInfoEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createSuccessEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import {
 	formatDateForDisplay,
@@ -118,11 +122,13 @@ export const backupCreate = {
 				await pipeline(archive, gzip, writeStream);
 			});
 
-			await interaction.editReply({ embeds: [
-				createSuccessEmbed(
-					`Backup "${formatDateForDisplay(now)}" created successfully for server ${serverName}.`
-				)
-			]})
+			await interaction.editReply({
+				embeds: [
+					createSuccessEmbed(
+						`Backup "${formatDateForDisplay(now)}" created successfully for server ${serverName}.`,
+					),
+				],
+			});
 		} catch (error) {
 			console.error("Error creating backup:", error);
 			await interaction.editReply({

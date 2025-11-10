@@ -107,7 +107,9 @@ export const backupRestore = {
 		if (server.ownerId !== interaction.user.id) {
 			await interaction.reply({
 				embeds: [
-					createInfoEmbed(`You are not the owner of server "${serverName}". Only the owner can restore a backup.`),
+					createInfoEmbed(
+						`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,
+					),
 				],
 			});
 			return;
@@ -120,7 +122,9 @@ export const backupRestore = {
 		if (!backupToRestore) {
 			await interaction.reply({
 				embeds: [
-					createInfoEmbed(`No backup found with the timestamp "${backupTimestamp}" for server "${serverName}".`),
+					createInfoEmbed(
+						`No backup found with the timestamp "${backupTimestamp}" for server "${serverName}".`,
+					),
 				],
 			});
 			return;
@@ -163,7 +167,9 @@ export const backupRestore = {
 
 			await interaction.editReply({
 				embeds: [
-					createInfoEmbed(`Backup "${formatDateForDisplay(backupToRestore)}" restored successfully for server "${serverName}".`),
+					createInfoEmbed(
+						`Backup "${formatDateForDisplay(backupToRestore)}" restored successfully for server "${serverName}".`,
+					),
 				],
 			});
 		} catch (error) {

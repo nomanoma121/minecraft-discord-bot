@@ -3,8 +3,6 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { server } from "typescript";
-import { Config } from "../config";
 import { EMBED_COLORS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
 import { createErrorEmbed } from "../lib/embed";
@@ -18,7 +16,7 @@ export const list = {
 
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
-		
+
 		try {
 			const containers = await docker.listContainers({
 				all: true,

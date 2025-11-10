@@ -1,12 +1,15 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
-import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed, createSuccessEmbed, createInfoEmbed } from "../lib/embed";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import { docker, filterLabelBuilder } from "../lib/docker";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createSuccessEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -82,7 +85,9 @@ export const stop = {
 			await containerInstance.stop();
 			console.log(`Minecraft server "${serverName}" stopped.`);
 
-			await interaction.editReply({ embeds: [createSuccessEmbed("Server stopped successfully.")] });
+			await interaction.editReply({
+				embeds: [createSuccessEmbed("Server stopped successfully.")],
+			});
 		} catch (error) {
 			console.error("Error stopping the Minecraft server:", error);
 			await interaction.editReply({

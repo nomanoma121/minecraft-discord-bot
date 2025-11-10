@@ -53,7 +53,7 @@ export const backupList = {
 		if (!server) {
 			await interaction.editReply({
 				embeds: [
-					createInfoEmbed(`No server found with the name "${serverName}".`),
+					createInfoEmbed(`No server found with the name **${serverName}**.`),
 				],
 			});
 			return;
@@ -63,7 +63,7 @@ export const backupList = {
 		if (backups.length === 0) {
 			await interaction.editReply({
 				embeds: [
-					createInfoEmbed(`No backups found for server "${serverName}".`),
+					createInfoEmbed(`No backups found for server **${serverName}**.`),
 				],
 			});
 			return;
@@ -74,7 +74,7 @@ export const backupList = {
 			.join("\n");
 
 		const embed = new EmbedBuilder()
-			.setTitle(`Backups for server "${serverName}"`)
+			.setTitle(`Backups for server **${serverName}**`)
 			.setColor(EMBED_COLORS.INFO)
 			.setDescription(backupList);
 

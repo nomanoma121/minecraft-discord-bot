@@ -65,7 +65,7 @@ const deleteCommand = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createInfoEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
@@ -76,7 +76,7 @@ const deleteCommand = {
 				await interaction.editReply({
 					embeds: [
 						createInfoEmbed(
-							`You are not the owner of server "${serverName}". Only the owner can delete this server.`,
+							`You are not the owner of server **${serverName}**. Only the owner can delete this server.`,
 						),
 					],
 				});
@@ -87,7 +87,7 @@ const deleteCommand = {
 				await interaction.editReply({
 					embeds: [
 						createInfoEmbed(
-							`Server "${serverName}" is currently running. Please stop the server before deleting it.`,
+							`Server **${serverName}** is currently running. Please stop the server before deleting it.`,
 						),
 					],
 				});
@@ -105,7 +105,7 @@ const deleteCommand = {
 				content: "",
 				embeds: [
 					createSuccessEmbed(
-						`Minecraft server "${serverName}" deleted successfully.`,
+						`Minecraft server **${serverName}** deleted successfully.`,
 					),
 				],
 			});

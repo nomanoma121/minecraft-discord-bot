@@ -160,7 +160,7 @@ export const create = {
 				await interaction.editReply({
 					embeds: [
 						createInfoEmbed(
-							`The server name "${server.name}" is already taken. Please choose a different name.`,
+							`The server name **${server.name}** is already taken. Please choose a different name.`,
 						),
 					],
 				});

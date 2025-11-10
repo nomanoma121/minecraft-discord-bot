@@ -56,7 +56,7 @@ export const status = {
 			if (!server) {
 				await interaction.editReply({
 					embeds: [
-						createInfoEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
@@ -71,7 +71,7 @@ export const status = {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Server "${serverName}" not found. The server may be deleted.`,
+							`Server **${serverName}** not found. The server may be deleted.`,
 						),
 					],
 				});

@@ -143,7 +143,7 @@ export const edit = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createInfoEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
@@ -165,7 +165,7 @@ export const edit = {
 				await interaction.editReply({
 					embeds: [
 						createInfoEmbed(
-							`Server "${serverName}" is currently running. Please stop the server before editing its configuration.`,
+							`Server **${serverName}** is currently running. Please stop the server before editing its configuration.`,
 						),
 					],
 				});
@@ -215,7 +215,7 @@ export const edit = {
 			});
 
 			await interaction.editReply({
-				content: `✅ **Server **${serverName}** Updated Successfully!**`,
+				content: `✅ Server **${serverName}** Updated Successfully!`,
 				embeds: [createServerInfoEmbed(updatedServer)],
 			});
 		} catch (error) {

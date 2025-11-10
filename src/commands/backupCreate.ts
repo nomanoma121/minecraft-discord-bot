@@ -70,7 +70,7 @@ export const backupCreate = {
 		if (!server) {
 			await interaction.editReply({
 				embeds: [
-					createInfoEmbed(`No server found with the name "${serverName}".`),
+					createInfoEmbed(`No server found with the name **${serverName}**.`),
 				],
 			});
 			return;
@@ -100,7 +100,7 @@ export const backupCreate = {
 
 			if (!containerInfo.State.Running) {
 				await interaction.editReply({
-					embeds: [createInfoEmbed(`Server "${serverName}" is not running.`)],
+					embeds: [createInfoEmbed(`Server **${serverName}** is not running.`)],
 				});
 				return;
 			}
@@ -128,7 +128,7 @@ export const backupCreate = {
 				content: "",
 				embeds: [
 					createSuccessEmbed(
-						`Backup "${formatDateForDisplay(now)}" created successfully for server "${serverName}".`,
+						`Backup **${formatDateForDisplay(now)}** created successfully for server **${serverName}**.`,
 					),
 				],
 			});
@@ -138,7 +138,7 @@ export const backupCreate = {
 				content: "",
 				embeds: [
 					createErrorEmbed(
-						`Failed to create backup for server "${serverName}".`,
+						`Failed to create backup for server **${serverName}**.`,
 					),
 				],
 			});

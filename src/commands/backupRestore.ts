@@ -99,7 +99,7 @@ export const backupRestore = {
 		if (!server) {
 			await interaction.editReply({
 				embeds: [
-					createInfoEmbed(`No server found with the name "${serverName}".`),
+					createInfoEmbed(`No server found with the name **${serverName}**.`),
 				],
 			});
 			return;
@@ -108,7 +108,7 @@ export const backupRestore = {
 			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
-						`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,
+						`You are not the owner of server **${serverName}**. Only the owner can restore a backup.`,
 					),
 				],
 			});
@@ -123,7 +123,7 @@ export const backupRestore = {
 			await interaction.editReply({
 				embeds: [
 					createInfoEmbed(
-						`No backup found with the timestamp "${backupTimestamp}" for server "${serverName}".`,
+						`No backup found with the timestamp **${backupTimestamp}** for server **${serverName}**.`,
 					),
 				],
 			});
@@ -140,7 +140,7 @@ export const backupRestore = {
 				await interaction.editReply({
 					embeds: [
 						createInfoEmbed(
-							`Server "${serverName}" must be stopped to restore a backup.`,
+							`Server **${serverName}** must be stopped to restore a backup.`,
 						),
 					],
 				});
@@ -171,7 +171,7 @@ export const backupRestore = {
 				content: "",
 				embeds: [
 					createInfoEmbed(
-						`Backup "${formatDateForDisplay(backupToRestore)}" restored successfully for server "${serverName}".`,
+						`Backup **${formatDateForDisplay(backupToRestore)}** restored successfully for server **${serverName}**.`,
 					),
 				],
 			});
@@ -183,7 +183,7 @@ export const backupRestore = {
 				content: "",
 				embeds: [
 					createErrorEmbed(
-						`Failed to restore backup for server "${serverName}": ${error.message}`,
+						`Failed to restore backup for server **${serverName}**: ${error.message}`,
 					),
 				],
 			});

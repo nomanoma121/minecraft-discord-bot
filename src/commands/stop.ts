@@ -64,7 +64,7 @@ export const stop = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createInfoEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
@@ -76,7 +76,7 @@ export const stop = {
 			if (!isRunning) {
 				await interaction.editReply({
 					embeds: [
-						createInfoEmbed(`Server "${serverName}" is already stopped.`),
+						createInfoEmbed(`Server **${serverName}** is already stopped.`),
 					],
 				});
 				return;
@@ -89,7 +89,7 @@ export const stop = {
 
 			await interaction.editReply({
 				content: "",
-				embeds: [createSuccessEmbed(`Server "${serverName}" stopped successfully.`)],
+				embeds: [createSuccessEmbed(`Server **${serverName}** stopped successfully.`)],
 			});
 		} catch (error) {
 			console.error("Error stopping the Minecraft server:", error);

@@ -67,7 +67,7 @@ export const start = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createInfoEmbed(`Server with name "${serverName}" does not exist.`),
+						createInfoEmbed(`Server with name **${serverName}** does not exist.`),
 					],
 				});
 				return;
@@ -115,7 +115,7 @@ export const start = {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Server "${serverName}" failed to start. Please try again later.`,
+							`Server **${serverName}** failed to start. Please try again later.`,
 						),
 					],
 				});

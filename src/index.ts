@@ -8,6 +8,7 @@ import {
 	GatewayIntentBits,
 	MessageFlags,
 } from "discord.js";
+import { createErrorEmbed } from "./lib/embed";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,12 +86,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			console.error(`Error executing ${interaction.commandName}:`, error);
 			if (interaction.replied || interaction.deferred) {
 				await interaction.followUp({
-					content: "There was an error while executing this command!",
+					embeds: [
+						createErrorEmbed(
+							"There was an error while executing this command!",
+						),
+					],
 					flags: MessageFlags.Ephemeral,
 				});
 			} else {
 				await interaction.reply({
-					content: "There was an error while executing this command!",
+					embeds: [
+						createErrorEmbed(
+							"There was an error while executing this command!",
+						),
+					],
 					flags: MessageFlags.Ephemeral,
 				});
 			}

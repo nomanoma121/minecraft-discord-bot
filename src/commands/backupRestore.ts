@@ -8,7 +8,7 @@ import {
 import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { getExistingBackups } from "../lib/backup";
 import { docker } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import {
 	formatDateForDisplay,
@@ -82,12 +82,14 @@ export const backupRestore = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString(SERVER_NAME_OPTION);
 		const backupTimestamp = interaction.options.getString(BACKUP_OPTION);
 		if (!serverName || !backupTimestamp) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
-					createErrorEmbed("Server name and backup timestamp are required."),
+					createInfoEmbed("Server name and backup timestamp are required."),
 				],
 			});
 			return;
@@ -95,17 +97,21 @@ export const backupRestore = {
 
 		const server = await getServerByName(serverName);
 		if (!server) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
-					createErrorEmbed(`No server found with the name "${serverName}".`),
+					createInfoEmbed(`No server found with the name **${serverName}**.`),
 				],
 			});
 			return;
 		}
 		if (server.ownerId !== interaction.user.id) {
-			await interaction.reply(
-				`You are not the owner of server "${serverName}". Only the owner can restore a backup.`,
-			);
+			await interaction.editReply({
+				embeds: [
+					createInfoEmbed(
+						`You are not the owner of server **${serverName}**. Only the owner can restore a backup.`,
+					),
+				],
+			});
 			return;
 		}
 
@@ -114,15 +120,15 @@ export const backupRestore = {
 			(backup) => backup.toString() === backupTimestamp,
 		);
 		if (!backupToRestore) {
-			await interaction.reply(
-				`No backup found with the timestamp "${backupTimestamp}" for server "${serverName}".`,
-			);
+			await interaction.editReply({
+				embeds: [
+					createInfoEmbed(
+						`No backup found with the timestamp **${backupTimestamp}** for server **${serverName}**.`,
+					),
+				],
+			});
 			return;
 		}
-
-		await interaction.reply(
-			`⌛ Restoring backup for server "${serverName}"...`,
-		);
 
 		const release = await mutex.acquire();
 
@@ -133,8 +139,8 @@ export const backupRestore = {
 			if (containerInfo.State.Running) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
-							`Server "${serverName}" must be stopped to restore a backup.`,
+						createInfoEmbed(
+							`Server **${serverName}** must be stopped to restore a backup.`,
 						),
 					],
 				});
@@ -145,6 +151,8 @@ export const backupRestore = {
 			const backupFilePath = `/backups/${server.id}/${backupFileName}`;
 			const backupStream = createReadStream(backupFilePath);
 			const gunzip = createGunzip();
+
+			await interaction.editReply("⌛ Restoring the backup...");
 
 			await new Promise<void>((resolve, reject) => {
 				backupStream.on("error", reject);
@@ -159,17 +167,23 @@ export const backupRestore = {
 					.catch(reject);
 			});
 
-			await interaction.editReply(
-				`✅ Backup restored successfully for server "${serverName}".`,
-			);
+			await interaction.editReply({
+				content: "",
+				embeds: [
+					createInfoEmbed(
+						`Backup **${formatDateForDisplay(backupToRestore)}** restored successfully for server **${serverName}**.`,
+					),
+				],
+			});
 		} catch (error) {
 			if (!(error instanceof Error)) {
 				throw error;
 			}
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
-						`Failed to restore backup for server "${serverName}": ${error.message}`,
+						`Failed to restore backup for server **${serverName}**: ${error.message}`,
 					),
 				],
 			});

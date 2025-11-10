@@ -36,6 +36,48 @@ export const formatDateForDisplay = (date: Date): string => {
 	return `${year}-${month}-${day} ${hour}:${minute}`;
 };
 
+export const formatUptime = (dateString: string): string => {
+	const startTime = new Date(dateString);
+	const now = new Date();
+
+	// Invalid date check
+	if (Number.isNaN(startTime.getTime())) {
+		return "Not started";
+	}
+
+	// Check zero date (0001-01-01T00:00:00Z)
+	if (startTime.getFullYear() === 1) {
+		return "Not started";
+	}
+
+	const diffMs = now.getTime() - startTime.getTime();
+
+	// Not started yet (future date)
+	if (diffMs <= 0) {
+		return "Not started";
+	}
+
+	const seconds = Math.floor(diffMs / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
+	const years = Math.floor(days / 365);
+
+	if (years > 0) {
+		return years === 1 ? "1 year ago" : `${years} years ago`;
+	}
+	if (days > 0) {
+		return days === 1 ? "1 day ago" : `${days} days ago`;
+	}
+	if (hours > 0) {
+		return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+	}
+	if (minutes > 0) {
+		return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
+	}
+	return seconds === 1 ? "1 second ago" : `${seconds} seconds ago`;
+};
+
 export const getAllServers = async () => {
 	const containers = await docker.listContainers({
 		all: true,

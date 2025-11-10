@@ -1,13 +1,11 @@
 import {
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
 import {
 	DEFAULT_MAX_PLAYERS,
 	DIFFICULTY,
-	EMBED_COLORS,
 	GAMEMODE,
 	SERVER_TYPE,
 } from "../constants";
@@ -17,7 +15,11 @@ import {
 	labelBuilder,
 	parseLabels,
 } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createServerInfoEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, ServerType } from "../types/server";
 
@@ -87,12 +89,12 @@ export const create = {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		await interaction.reply("⏳ Creating Minecraft Server...");
+		await interaction.deferReply();
 
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
 			await interaction.editReply({
-				embeds: [createErrorEmbed("Server name is required.")],
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -100,7 +102,7 @@ export const create = {
 		const version = interaction.options.getString("version");
 		if (!version) {
 			await interaction.editReply({
-				embeds: [createErrorEmbed("Minecraft version is required.")],
+				embeds: [createInfoEmbed("Minecraft version is required.")],
 			});
 			return;
 		}
@@ -142,7 +144,7 @@ export const create = {
 			if (existingServerCount >= Config.maxServerCount) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							"The maximum number of servers has been reached. Please try again later.",
 						),
 					],
@@ -157,8 +159,8 @@ export const create = {
 			if (isNameTaken) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
-							`The server name "${server.name}" is already taken. Please choose a different name.`,
+						createInfoEmbed(
+							`The server name **${server.name}** is already taken. Please choose a different name.`,
 						),
 					],
 				});
@@ -167,10 +169,12 @@ export const create = {
 
 			if (Number(server.maxPlayers) < 1 || Number(server.maxPlayers) > 100) {
 				await interaction.editReply({
-					embeds: [createErrorEmbed("Max players must be between 1 and 100.")],
+					embeds: [createInfoEmbed("Max players must be between 1 and 100.")],
 				});
 				return;
 			}
+
+			await interaction.editReply("⌛ Creating the server...");
 
 			await docker.createVolume({
 				Name: server.id,
@@ -205,32 +209,14 @@ export const create = {
 			});
 			console.log("Minecraft server container created.");
 
-			const embed = new EmbedBuilder()
-				.setTitle("Created Server Information")
-				.setColor(EMBED_COLORS.SUCCESS)
-				.addFields(
-					{ name: "Server Name", value: server.name, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Gamemode", value: server.gamemode, inline: true },
-					{ name: "Difficulty", value: server.difficulty, inline: true },
-					{
-						name: "Max Players",
-						value: server.maxPlayers.toString(),
-						inline: true,
-					},
-					{
-						name: "Description",
-						value: server.description || "N/A",
-						inline: false,
-					},
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "Use /start to start your server." });
-			await interaction.editReply("✅ Minecraft server created successfully!");
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({
+				content: `✅ Server **${serverName}** Created Successfully!`,
+				embeds: [createServerInfoEmbed(server)],
+			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while creating the Minecraft server. Please try again later.",

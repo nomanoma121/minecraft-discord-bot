@@ -1,14 +1,17 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
 import type Dockerode from "dockerode";
-import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { docker } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
-import { getAllServers, getServerByName } from "../utils";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createServerInfoEmbed,
+} from "../lib/embed";
+import { formatUptime, getAllServers, getServerByName } from "../utils";
 
 export const status = {
 	name: "status",
@@ -38,22 +41,22 @@ export const status = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Fetching status for server "${serverName}"...`);
 
 		try {
 			const server = await getServerByName(serverName);
 			if (!server) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
@@ -68,7 +71,7 @@ export const status = {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Server "${serverName}" not found. The server may be deleted.`,
+							`Server **${serverName}** not found. The server may be deleted.`,
 						),
 					],
 				});
@@ -76,20 +79,14 @@ export const status = {
 				return;
 			}
 			const isRunning = containerInfo.State.Running;
-			const statusText = isRunning ? "Running" : "Stopped";
+			const uptime = isRunning
+				? `for ${formatUptime(containerInfo.State.StartedAt)}`
+				: formatUptime(containerInfo.State.FinishedAt);
+			const status = `${isRunning ? "Running" : "Stopped"} ${uptime}`;
 
-			const embed = new EmbedBuilder()
-				.setTitle(`Status of Minecraft Server: ${serverName}`)
-				.setColor(isRunning ? EMBED_COLORS.SUCCESS : EMBED_COLORS.ERROR)
-				.addFields(
-					{ name: "Status", value: statusText, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Gamemode", value: server.gamemode, inline: true },
-					{ name: "Difficulty", value: server.difficulty, inline: true },
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				);
-
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({
+				embeds: [createServerInfoEmbed(server, status)],
+			});
 		} catch (error) {
 			console.error("Error checking server status:", error);
 			await interaction.editReply({

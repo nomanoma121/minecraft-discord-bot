@@ -12,6 +12,8 @@ export const help = {
 		.setDescription("Shows all available commands and their descriptions"),
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const embed = new EmbedBuilder()
 			.setTitle("Minecraft Discord Bot - Commands")
 			.setColor(EMBED_COLORS.INFO)
@@ -86,6 +88,6 @@ export const help = {
 				text: "Use /create to get started with your first server!",
 			});
 
-		await interaction.reply({ embeds: [embed] });
+		await interaction.editReply({ embeds: [embed] });
 	},
 };

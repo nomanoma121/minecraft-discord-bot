@@ -2,12 +2,15 @@ import { rm } from "node:fs/promises";
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createSuccessEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -39,15 +42,15 @@ const deleteCommand = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 
@@ -62,7 +65,7 @@ const deleteCommand = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
@@ -72,8 +75,8 @@ const deleteCommand = {
 			if (server.ownerId !== interaction.user.id) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
-							`You are not the owner of server "${serverName}". Only the owner can delete this server.`,
+						createInfoEmbed(
+							`You are not the owner of server **${serverName}**. Only the owner can delete this server.`,
 						),
 					],
 				});
@@ -83,44 +86,33 @@ const deleteCommand = {
 			if (container.State === "running") {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
-							`Server "${serverName}" is currently running. Please stop the server before deleting it.`,
+						createInfoEmbed(
+							`Server **${serverName}** is currently running. Please stop the server before deleting it.`,
 						),
 					],
 				});
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n⌛ Removing server...`,
-			);
+			await interaction.editReply("⌛ Deleting the server...");
 
 			const containerInstance = docker.getContainer(container.Id);
 
 			await containerInstance.remove({ v: true });
 			await rm(`/backups/${server.id}`, { recursive: true, force: true });
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n✅ Remove server\n\n`,
-			);
-
-			const embed = new EmbedBuilder()
-				.setTitle(`Minecraft Server "${serverName}" Deleted`)
-				.setColor(EMBED_COLORS.SUCCESS)
-				.setDescription(
-					`The Minecraft server "${serverName}" has been deleted successfully.`,
-				)
-				.addFields(
-					{ name: "Server Name", value: server.name, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "All data for this server has been removed." });
-
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({
+				content: "",
+				embeds: [
+					createSuccessEmbed(
+						`Minecraft server **${serverName}** deleted successfully.`,
+					),
+				],
+			});
 		} catch (error) {
 			console.error("Error deleting the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while deleting the Minecraft server. Please try again later.",

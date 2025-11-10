@@ -15,9 +15,14 @@ import {
 	withSafeSave,
 } from "../lib/backup";
 import { docker } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createSuccessEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import {
+	formatDateForDisplay,
 	formatTimestampForFilename,
 	getAllServers,
 	getServerByName,
@@ -51,19 +56,21 @@ export const backupCreate = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
 
 		const server = await getServerByName(serverName);
 		if (!server) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
-					createErrorEmbed(`No server found with the name "${serverName}".`),
+					createInfoEmbed(`No server found with the name **${serverName}**.`),
 				],
 			});
 			return;
@@ -75,17 +82,15 @@ export const backupCreate = {
 			totalBackupCounts >= Config.maxTotalBackupCount ||
 			serverBackups.length >= Config.maxBackupCountPerServer
 		) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
-					createErrorEmbed(
+					createInfoEmbed(
 						`Backup limit reached. Max total backups: ${Config.maxTotalBackupCount}, Max backups per server: ${Config.maxBackupCountPerServer}. Please delete old backups before creating new ones.`,
 					),
 				],
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Creating backup for server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 
@@ -95,13 +100,16 @@ export const backupCreate = {
 
 			if (!containerInfo.State.Running) {
 				await interaction.editReply({
-					embeds: [createErrorEmbed(`Server "${serverName}" is not running.`)],
+					embeds: [createInfoEmbed(`Server **${serverName}** is not running.`)],
 				});
 				return;
 			}
 
+			await interaction.editReply("⌛ Creating backup...");
+
+			const now = new Date();
 			await withSafeSave(container, async () => {
-				const timestamp = formatTimestampForFilename(new Date());
+				const timestamp = formatTimestampForFilename(now);
 				const backupFileName = `${timestamp}.tar.gz`;
 				const backupFilePath = `/backups/${server.id}/${backupFileName}`;
 
@@ -116,15 +124,21 @@ export const backupCreate = {
 				await pipeline(archive, gzip, writeStream);
 			});
 
-			await interaction.editReply(
-				`✅ Backup for server "${serverName}" created successfully.`,
-			);
+			await interaction.editReply({
+				content: "",
+				embeds: [
+					createSuccessEmbed(
+						`Backup **${formatDateForDisplay(now)}** created successfully for server **${serverName}**.`,
+					),
+				],
+			});
 		} catch (error) {
 			console.error("Error creating backup:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
-						`Failed to create backup for server "${serverName}".`,
+						`Failed to create backup for server **${serverName}**.`,
 					),
 				],
 			});

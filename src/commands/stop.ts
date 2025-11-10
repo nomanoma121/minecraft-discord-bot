@@ -1,12 +1,15 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS } from "../constants";
-import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import { AUTOCOMPLETE_MAX_CHOICES } from "../constants";
+import { docker, filterLabelBuilder } from "../lib/docker";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createSuccessEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers } from "../utils";
 
@@ -38,15 +41,15 @@ export const stop = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 
@@ -61,53 +64,39 @@ export const stop = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
 			}
 
-			const server = parseLabels(container.Labels);
 			const containerInstance = docker.getContainer(container.Id);
 
 			const isRunning = container.State === "running";
 			if (!isRunning) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`Server "${serverName}" is already stopped.`),
+						createInfoEmbed(`Server **${serverName}** is already stopped.`),
 					],
 				});
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n⌛ Stopping Minecraft Server...`,
-			);
+			await interaction.editReply("⌛ Stopping the server...");
 
 			await containerInstance.stop();
 			console.log(`Minecraft server "${serverName}" stopped.`);
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n✅ Stop Minecraft Server\n\n`,
-			);
-
-			const embed = new EmbedBuilder()
-				.setTitle(`Minecraft Server "${serverName}" Stopped`)
-				.setColor(EMBED_COLORS.SUCCESS)
-				.setDescription(
-					`The Minecraft server "${serverName}" has been stopped successfully.`,
-				)
-				.addFields(
-					{ name: "Server Name", value: server.name, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "Use /start to start your server again." });
-
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({
+				content: "",
+				embeds: [
+					createSuccessEmbed(`Server **${serverName}** stopped successfully.`),
+				],
+			});
 		} catch (error) {
 			console.error("Error stopping the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while stopping the Minecraft server. Please try again later.",

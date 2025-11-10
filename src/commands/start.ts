@@ -1,16 +1,15 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import {
-	AUTOCOMPLETE_MAX_CHOICES,
-	EMBED_COLORS,
-	HEALTH_STATUS,
-} from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, HEALTH_STATUS } from "../constants";
 import { docker, filterLabelBuilder, parseLabels } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createServerInfoEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import { getAllServers, getRunningServers } from "../utils";
 
@@ -45,15 +44,15 @@ export const start = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 
@@ -68,8 +67,8 @@ export const start = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
-							`Server with name "${serverName}" does not exist.`,
+						createInfoEmbed(
+							`Server with name **${serverName}** does not exist.`,
 						),
 					],
 				});
@@ -80,7 +79,7 @@ export const start = {
 			if (runningServers.length > 0) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							`Another server is already running. Please stop it before starting a new one.`,
 						),
 					],
@@ -88,15 +87,13 @@ export const start = {
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n⌛ Starting Minecraft Server...`,
-			);
+			await interaction.editReply("⌛ Starting the server...");
 
 			const containerInstance = docker.getContainer(container.Id);
 			await containerInstance.start();
 
 			await interaction.editReply(
-				`✅ Check server "${serverName}"\n✅ Start container\n⌛ Waiting for Minecraft server to be ready...`,
+				"⌛ Waiting for the server to become healthy...",
 			);
 
 			const startTime = Date.now();
@@ -122,48 +119,23 @@ export const start = {
 				await interaction.editReply({
 					embeds: [
 						createErrorEmbed(
-							`Server "${serverName}" failed to start. Please try again later.`,
+							`Server **${serverName}** failed to start. Please try again later.`,
 						),
 					],
 				});
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n✅ Start server\n✅ Minecraft server ready\n\n`,
-			);
-
 			const server = parseLabels(container.Labels);
 
-			const embed = new EmbedBuilder()
-				.setTitle(`Minecraft Server "${serverName}" Started`)
-				.setColor(EMBED_COLORS.SUCCESS)
-				.setDescription(
-					`The Minecraft server "${serverName}" has been started successfully.`,
-				)
-				.addFields(
-					{ name: "Server Name", value: server.name, inline: true },
-					{ name: "Version", value: server.version, inline: true },
-					{ name: "Gamemode", value: server.gamemode, inline: true },
-					{ name: "Difficulty", value: server.difficulty, inline: true },
-					{
-						name: "Max Players",
-						value: server.maxPlayers.toString(),
-						inline: true,
-					},
-					{
-						name: "Description",
-						value: server.description || "N/A",
-						inline: false,
-					},
-					{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "Enjoy your game!" });
-
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({
+				content: `✅ Server **${serverName}** Started Successfully!`,
+				embeds: [createServerInfoEmbed(server)],
+			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while starting the Minecraft server. Please try again later.",

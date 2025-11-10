@@ -1,23 +1,21 @@
 import {
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
-	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
 import { Config } from "../config";
-import {
-	AUTOCOMPLETE_MAX_CHOICES,
-	DIFFICULTY,
-	EMBED_COLORS,
-	GAMEMODE,
-} from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, DIFFICULTY, GAMEMODE } from "../constants";
 import {
 	docker,
 	filterLabelBuilder,
 	labelBuilder,
 	parseLabels,
 } from "../lib/docker";
-import { createErrorEmbed } from "../lib/embed";
+import {
+	createErrorEmbed,
+	createInfoEmbed,
+	createServerInfoEmbed,
+} from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
 import { getAllServers } from "../utils";
@@ -94,10 +92,12 @@ export const edit = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		await interaction.deferReply();
+
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
-			await interaction.reply({
-				embeds: [createErrorEmbed("Server name is required.")],
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server name is required.")],
 			});
 			return;
 		}
@@ -113,26 +113,22 @@ export const edit = {
 		const version = interaction.options.getString("version");
 
 		if (!description && !maxPlayers && !gamemode && !difficulty && !version) {
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [
-					createErrorEmbed(
+					createInfoEmbed(
 						"Please provide at least one field to update (description, max-players, gamemode, or difficulty).",
 					),
 				],
-				ephemeral: true,
 			});
 			return;
 		}
 
 		if (maxPlayers && (maxPlayers < 1 || maxPlayers > 100)) {
-			await interaction.reply({
-				embeds: [createErrorEmbed("Max players must be between 1 and 100.")],
-				ephemeral: true,
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Max players must be between 1 and 100.")],
 			});
 			return;
 		}
-
-		await interaction.reply(`⌛ Checking server "${serverName}"...`);
 
 		const release = await mutex.acquire();
 
@@ -147,7 +143,7 @@ export const edit = {
 			if (!container) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(`No server found with the name "${serverName}".`),
+						createInfoEmbed(`No server found with the name **${serverName}**.`),
 					],
 				});
 				return;
@@ -157,7 +153,7 @@ export const edit = {
 			if (server.ownerId !== interaction.user.id) {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
+						createInfoEmbed(
 							"You don't have permission to edit this server. Only the owner can edit it.",
 						),
 					],
@@ -168,17 +164,15 @@ export const edit = {
 			if (container.State === "running") {
 				await interaction.editReply({
 					embeds: [
-						createErrorEmbed(
-							`Server "${serverName}" is currently running. Please stop the server before editing its configuration.`,
+						createInfoEmbed(
+							`Server **${serverName}** is currently running. Please stop the server before editing its configuration.`,
 						),
 					],
 				});
 				return;
 			}
 
-			await interaction.editReply(
-				`✅ Check server "${serverName}"\n⌛ Updating configuration...`,
-			);
+			await interaction.editReply("⌛ Updating the server...");
 
 			const updatedServer: Server = { ...server, updatedAt: new Date() };
 
@@ -220,43 +214,14 @@ export const edit = {
 				},
 			});
 
-			const embed = new EmbedBuilder()
-				.setTitle(`Server "${serverName}" Updated`)
-				.setColor(EMBED_COLORS.SUCCESS)
-				.setDescription(
-					"The server configuration has been updated successfully.\n\n**Note:** You need to restart the server for changes to take effect.",
-				)
-				.addFields(
-					{ name: "Server Name", value: updatedServer.name, inline: true },
-					{ name: "Version", value: updatedServer.version, inline: true },
-					{
-						name: "Gamemode",
-						value: updatedServer.gamemode,
-						inline: true,
-					},
-					{
-						name: "Difficulty",
-						value: updatedServer.difficulty,
-						inline: true,
-					},
-					{
-						name: "Max Players",
-						value: updatedServer.maxPlayers.toString(),
-						inline: true,
-					},
-					{
-						name: "Description",
-						value: updatedServer.description || "N/A",
-						inline: false,
-					},
-					{ name: "Owner", value: `<@${updatedServer.ownerId}>`, inline: true },
-				)
-				.setFooter({ text: "Restart the server to apply changes" });
-
-			await interaction.editReply({ content: "", embeds: [embed] });
+			await interaction.editReply({
+				content: `✅ Server **${serverName}** Updated Successfully!`,
+				embeds: [createServerInfoEmbed(updatedServer)],
+			});
 		} catch (error) {
 			console.error("Error editing server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while updating the server. Please try again later.",

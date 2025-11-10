@@ -1,4 +1,5 @@
 import {
+	AttachmentBuilder,
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
@@ -11,7 +12,12 @@ import {
 	createInfoEmbed,
 	createServerInfoEmbed,
 } from "../lib/embed";
-import { formatUptime, getAllServers, getServerByName } from "../utils";
+import {
+	formatUptime,
+	getAllServers,
+	getIconImage,
+	getServerByName,
+} from "../utils";
 
 export const status = {
 	name: "status",
@@ -84,8 +90,22 @@ export const status = {
 				: formatUptime(containerInfo.State.FinishedAt);
 			const status = `${isRunning ? "Running" : "Stopped"} ${uptime}`;
 
+			const serverIconBuffer = getIconImage(server.id);
+			let serverIconAttachment: AttachmentBuilder | undefined;
+			if (serverIconBuffer) {
+				serverIconAttachment = new AttachmentBuilder(serverIconBuffer, {
+					name: `${server.id}.png`,
+				});
+			}
+
 			await interaction.editReply({
-				embeds: [createServerInfoEmbed(server, { status })],
+				embeds: [
+					createServerInfoEmbed(server, {
+						status,
+						attachment: serverIconAttachment,
+					}),
+				],
+				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {
 			console.error("Error checking server status:", error);

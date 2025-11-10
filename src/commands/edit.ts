@@ -1,4 +1,5 @@
 import {
+	AttachmentBuilder,
 	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
@@ -18,7 +19,8 @@ import {
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
-import { getAllServers } from "../utils";
+import { getAllServers, saveIconImage } from "../utils";
+import sharp from "sharp";
 
 export const edit = {
 	name: "edit",
@@ -75,6 +77,12 @@ export const edit = {
 				.setName("version")
 				.setDescription("Minecraft version")
 				.setRequired(false),
+		)
+		.addAttachmentOption((option) =>
+			option
+				.setName("icon")
+				.setDescription("Icon image for the server (PNG format)")
+				.setRequired(false),
 		),
 
 	async autocomplete(interaction: AutocompleteInteraction) {
@@ -130,6 +138,14 @@ export const edit = {
 			return;
 		}
 
+		const iconAttachment = interaction.options.getAttachment("icon");
+		if (iconAttachment && !iconAttachment.contentType?.includes("image/png")) {
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server icon must be a PNG image.")],
+			});
+			return;
+		}
+
 		const release = await mutex.acquire();
 
 		try {
@@ -161,6 +177,22 @@ export const edit = {
 				return;
 			}
 
+			const updatedServer: Server = { ...server, updatedAt: new Date() };
+
+			let serverIconAttachment: AttachmentBuilder | undefined;
+			if (iconAttachment) {
+				const response = await fetch(iconAttachment.url);
+				const imageBuffer = Buffer.from(await response.arrayBuffer());
+				const resizedImageBuffer = await sharp(imageBuffer)
+					.resize(64, 64)
+					.png()
+					.toBuffer();
+				serverIconAttachment = new AttachmentBuilder(resizedImageBuffer, {
+					name: `${server.id}.png`,
+				});
+				updatedServer.iconPath = await saveIconImage(server.id, resizedImageBuffer);
+			}
+			
 			if (container.State === "running") {
 				await interaction.editReply({
 					embeds: [
@@ -173,8 +205,6 @@ export const edit = {
 			}
 
 			await interaction.editReply("⌛ Updating the server...");
-
-			const updatedServer: Server = { ...server, updatedAt: new Date() };
 
 			if (description) updatedServer.description = description;
 			if (maxPlayers) updatedServer.maxPlayers = String(maxPlayers);
@@ -216,7 +246,8 @@ export const edit = {
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Updated Successfully!`,
-				embeds: [createServerInfoEmbed(updatedServer)],
+				embeds: [createServerInfoEmbed(updatedServer, { attachment: serverIconAttachment })],
+				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {
 			console.error("Error editing server:", error);

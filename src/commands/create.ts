@@ -4,6 +4,7 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
+import sharp from "sharp";
 import { Config } from "../config";
 import {
 	DEFAULT_MAX_PLAYERS,
@@ -24,10 +25,8 @@ import {
 	createServerInfoEmbed,
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
-import type { Difficulty, Gamemode, ServerType } from "../types/server";
+import type { Difficulty, Gamemode, Server, ServerType } from "../types/server";
 import { saveIconImage } from "../utils";
-import sharp from "sharp";
-import type { Server } from "../types/server";
 
 export const create = {
 	name: "create",
@@ -158,7 +157,9 @@ export const create = {
 					.resize(64, 64)
 					.png()
 					.toBuffer();
-				serverIconAttachment = new AttachmentBuilder(resizedImageBuffer, { name: `${server.id}.png` });
+				serverIconAttachment = new AttachmentBuilder(resizedImageBuffer, {
+					name: `${server.id}.png`,
+				});
 				server.iconPath = await saveIconImage(server.id, resizedImageBuffer);
 			} catch (error) {
 				console.error("Error saving server icon:", error);
@@ -253,12 +254,12 @@ export const create = {
 			});
 			console.log("Minecraft server container created.");
 
-			const files = serverIconAttachment ? [serverIconAttachment] : [];
-
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Created Successfully!`,
-				embeds: [createServerInfoEmbed(server, { attachment: serverIconAttachment })],
-				files: files,
+				embeds: [
+					createServerInfoEmbed(server, { attachment: serverIconAttachment }),
+				],
+				files: serverIconAttachment ? [serverIconAttachment] : [],
 			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);

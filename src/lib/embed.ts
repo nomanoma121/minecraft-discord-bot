@@ -1,7 +1,7 @@
+import type { AttachmentBuilder } from "discord.js";
 import { EmbedBuilder } from "discord.js";
 import { EMBED_COLORS, SERVER_DEFAULT_ICON_URL } from "../constants";
 import type { Server } from "../types/server";
-import type { AttachmentBuilder } from "discord.js";
 
 export const createErrorEmbed = (errorMessage: string) => {
 	return new EmbedBuilder()
@@ -24,7 +24,10 @@ export const createSuccessEmbed = (description: string) => {
 		.setDescription(description);
 };
 
-export const createServerInfoEmbed = (server: Server, options?: { status?: string; attachment?: AttachmentBuilder }) => {
+export const createServerInfoEmbed = (
+	server: Server,
+	options?: { status?: string; attachment?: AttachmentBuilder },
+) => {
 	const embed = new EmbedBuilder()
 		.setTitle(server.name)
 		.setColor(EMBED_COLORS.INFO)

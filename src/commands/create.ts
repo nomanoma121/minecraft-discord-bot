@@ -9,6 +9,7 @@ import {
 	DEFAULT_MAX_PLAYERS,
 	DIFFICULTY,
 	GAMEMODE,
+	ICONS_VOLUME_NAME,
 	MINECRAFT_SERVER_IMAGE,
 	OPTIONS,
 	SERVER_TYPE,
@@ -238,7 +239,10 @@ export const create = {
 					PortBindings: {
 						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],
 					},
-					Binds: [`${server.id}:/data`],
+					Binds: [
+						`${server.id}:/data`,
+						`${ICONS_VOLUME_NAME}:/app/data/icons:ro`,
+					],
 				},
 				ExposedPorts: {
 					[`${Config.port}/tcp`]: {},

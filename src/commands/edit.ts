@@ -10,6 +10,7 @@ import {
 	AUTOCOMPLETE_MAX_CHOICES,
 	DIFFICULTY,
 	GAMEMODE,
+	ICONS_VOLUME_NAME,
 	OPTIONS,
 } from "../constants";
 import {
@@ -246,7 +247,10 @@ export const edit = {
 					PortBindings: {
 						[`${Config.port}/tcp`]: [{ HostPort: Config.port.toString() }],
 					},
-					Binds: [`${server.id}:/data`],
+					Binds: [
+						`${server.id}:/data`,
+						`${ICONS_VOLUME_NAME}:/app/data/icons:ro`,
+					],
 				},
 				ExposedPorts: {
 					[`${Config.port}/tcp`]: {},

@@ -152,6 +152,8 @@ export const backupRestore = {
 			const backupStream = createReadStream(backupFilePath);
 			const gunzip = createGunzip();
 
+			await interaction.editReply("⌛ Restoring the backup...");
+
 			await new Promise<void>((resolve, reject) => {
 				backupStream.on("error", reject);
 				gunzip.on("error", reject);
@@ -166,6 +168,7 @@ export const backupRestore = {
 			});
 
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createInfoEmbed(
 						`Backup "${formatDateForDisplay(backupToRestore)}" restored successfully for server "${serverName}".`,
@@ -177,6 +180,7 @@ export const backupRestore = {
 				throw error;
 			}
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						`Failed to restore backup for server "${serverName}": ${error.message}`,

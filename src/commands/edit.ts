@@ -172,6 +172,8 @@ export const edit = {
 				return;
 			}
 
+			await interaction.editReply("⌛ Updating the server...");
+
 			const updatedServer: Server = { ...server, updatedAt: new Date() };
 
 			if (description) updatedServer.description = description;
@@ -213,12 +215,13 @@ export const edit = {
 			});
 
 			await interaction.editReply({
-				content: "",
+				content: `✅ **Server **${serverName}** Updated Successfully!**`,
 				embeds: [createServerInfoEmbed(updatedServer)],
 			});
 		} catch (error) {
 			console.error("Error editing server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while updating the server. Please try again later.",

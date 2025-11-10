@@ -94,12 +94,15 @@ const deleteCommand = {
 				return;
 			}
 
+			await interaction.editReply("⌛ Deleting the server...");
+
 			const containerInstance = docker.getContainer(container.Id);
 
 			await containerInstance.remove({ v: true });
 			await rm(`/backups/${server.id}`, { recursive: true, force: true });
 
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createSuccessEmbed(
 						`Minecraft server "${serverName}" deleted successfully.`,
@@ -109,6 +112,7 @@ const deleteCommand = {
 		} catch (error) {
 			console.error("Error deleting the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while deleting the Minecraft server. Please try again later.",

@@ -85,8 +85,12 @@ export const start = {
 				return;
 			}
 
+			await interaction.editReply("⌛ Starting the server...");
+
 			const containerInstance = docker.getContainer(container.Id);
 			await containerInstance.start();
+
+			await interaction.editReply("⌛ Waiting for the server to become healthy...");
 
 			const startTime = Date.now();
 			let isHealthy = false;
@@ -120,10 +124,14 @@ export const start = {
 
 			const server = parseLabels(container.Labels);
 
-			await interaction.editReply({ embeds: [createServerInfoEmbed(server)] });
+			await interaction.editReply({ 
+				content: `✅ Server **${serverName}** Started Successfully!`,
+				embeds: [createServerInfoEmbed(server)]
+			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while starting the Minecraft server. Please try again later.",

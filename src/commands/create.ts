@@ -174,6 +174,8 @@ export const create = {
 				return;
 			}
 
+			await interaction.editReply("⌛ Creating the server...");
+
 			await docker.createVolume({
 				Name: server.id,
 			});
@@ -207,10 +209,14 @@ export const create = {
 			});
 			console.log("Minecraft server container created.");
 
-			await interaction.editReply({ embeds: [createServerInfoEmbed(server)] });
+			await interaction.editReply({ 
+				content: `✅ Server **${serverName}** Created Successfully!`,
+				embeds: [createServerInfoEmbed(server)] 
+			});
 		} catch (error) {
 			console.error("Error starting the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while creating the Minecraft server. Please try again later.",

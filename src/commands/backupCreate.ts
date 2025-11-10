@@ -56,7 +56,7 @@ export const backupCreate = {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		interaction.deferReply();
+		await interaction.deferReply();
 
 		const serverName = interaction.options.getString("server-name");
 		if (!serverName) {
@@ -105,6 +105,8 @@ export const backupCreate = {
 				return;
 			}
 
+			await interaction.editReply("⌛ Creating backup...");
+
 			const now = new Date();
 			await withSafeSave(container, async () => {
 				const timestamp = formatTimestampForFilename(now);
@@ -123,15 +125,17 @@ export const backupCreate = {
 			});
 
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createSuccessEmbed(
-						`Backup "${formatDateForDisplay(now)}" created successfully for server ${serverName}.`,
+						`Backup "${formatDateForDisplay(now)}" created successfully for server "${serverName}".`,
 					),
 				],
 			});
 		} catch (error) {
 			console.error("Error creating backup:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						`Failed to create backup for server "${serverName}".`,

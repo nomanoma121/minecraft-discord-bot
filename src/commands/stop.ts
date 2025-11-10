@@ -82,15 +82,19 @@ export const stop = {
 				return;
 			}
 
+			await interaction.editReply("⌛ Stopping the server...");
+
 			await containerInstance.stop();
 			console.log(`Minecraft server "${serverName}" stopped.`);
 
 			await interaction.editReply({
-				embeds: [createSuccessEmbed("Server stopped successfully.")],
+				content: "",
+				embeds: [createSuccessEmbed(`Server "${serverName}" stopped successfully.`)],
 			});
 		} catch (error) {
 			console.error("Error stopping the Minecraft server:", error);
 			await interaction.editReply({
+				content: "",
 				embeds: [
 					createErrorEmbed(
 						"An error occurred while stopping the Minecraft server. Please try again later.",

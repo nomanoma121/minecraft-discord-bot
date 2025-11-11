@@ -8,10 +8,19 @@ import {
 	GatewayIntentBits,
 	MessageFlags,
 } from "discord.js";
+import { ICONS_VOLUME_NAME } from "./constants";
+import { docker } from "./lib/docker";
 import { createErrorEmbed } from "./lib/embed";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+try {
+	await docker.createVolume({ Name: ICONS_VOLUME_NAME });
+	console.log("Icons volume created or already exists.");
+} catch (error) {
+	console.log("Icons volume initialization:", error);
+}
 
 const client = new Client({
 	intents: [

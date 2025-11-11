@@ -12,9 +12,10 @@ export const GAMEMODE = {
 	SPECTATOR: "spectator",
 } as const;
 
-// Currently, only Paper is supported
 export const SERVER_TYPE = {
 	PAPER: "PAPER",
+	VANILLA: "VANILLA",
+	FORGE: "FORGE",
 } as const;
 
 export const HEALTH_STATUS = {

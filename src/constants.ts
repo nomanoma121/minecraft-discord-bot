@@ -52,6 +52,7 @@ export const OPTIONS = {
 	OPS: "ops",
 	ICON: "icon",
 	BACKUP: "backup",
+	ENABLE_WHITELIST: "enable-whitelist",
 } as const;
 
 export const DEFAULT_MAX_PLAYERS = 20;

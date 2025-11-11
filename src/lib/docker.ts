@@ -31,8 +31,7 @@ export const filterLabelBuilder = (opts: Labels): string[] => {
 			case "description":
 			case "managed":
 			case "iconPath":
-			case "whitelistedUserIds":
-			case "opsUserIds":
+			case "enableWhitelist":
 			case "createdAt":
 			case "updatedAt":
 				labels.push(
@@ -70,8 +69,11 @@ export const serverEnvBuilder = (server: Server): string[] => {
 		`TYPE=${server.type}`,
 		`MODE=${server.gamemode}`,
 		`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
-		`OVERRIDE_ICON=TRUE`,
 		`MOTD=${server.description}`,
+		`ENABLE_WHITELIST=${server.enableWhitelist}`,
+		`OVERRIDE_ICON=TRUE`,
+		`OVERRIDE_WHITELIST=true`,
+		`OVERRIDE_OPS=true`,
 	];
 	return env;
 };
@@ -98,20 +100,13 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 		type: getValue("type") as ServerType,
 		gamemode: getValue("gamemode") as Gamemode,
 		description: getValue("description"),
+		enableWhitelist: getValue("enableWhitelist") === "true",
 		createdAt: new Date(getValue("createdAt")),
 		updatedAt: new Date(getValue("updatedAt")),
 	};
 
 	if (labels[`${DOCKER_LABEL_PREFIX}.iconPath`]) {
 		server.iconPath = getValue("iconPath");
-	}
-
-	if (labels[`${DOCKER_LABEL_PREFIX}.whitelistedUserIds`]) {
-		server.whitelistedUserIds = JSON.parse(getValue("whitelistedUserIds"));
-	}
-
-	if (labels[`${DOCKER_LABEL_PREFIX}.opsUserIds`]) {
-		server.opsUserIds = JSON.parse(getValue("opsUserIds"));
 	}
 
 	return server;

@@ -98,6 +98,12 @@ export const create = {
 				.setDescription("Maximum number of players (default: 20)")
 				.setRequired(false),
 		)
+		.addBooleanOption((option) =>
+			option
+				.setName(OPTIONS.ENABLE_WHITELIST)
+				.setDescription("Enable the server whitelist (default: false)")
+				.setRequired(false),
+		)
 		.addAttachmentOption((option) =>
 			option
 				.setName(OPTIONS.ICON)
@@ -151,6 +157,7 @@ export const create = {
 			description:
 				interaction.options.getString(OPTIONS.DESCRIPTION) ||
 				"A Minecraft server",
+			enableWhitelist: interaction.options.getBoolean(OPTIONS.ENABLE_WHITELIST) || false,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};

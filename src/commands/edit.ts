@@ -85,6 +85,12 @@ export const edit = {
 				.setDescription("Minecraft version")
 				.setRequired(false),
 		)
+		.addBooleanOption((option) =>
+			option
+				.setName(OPTIONS.ENABLE_WHITELIST)
+				.setDescription("Enable the server whitelist")
+				.setRequired(false),
+		)
 		.addAttachmentOption((option) =>
 			option
 				.setName(OPTIONS.ICON)
@@ -128,6 +134,7 @@ export const edit = {
 			OPTIONS.DIFFICULTY,
 		) as Difficulty | null;
 		const version = interaction.options.getString(OPTIONS.VERSION);
+		const enableWhitelist = interaction.options.getBoolean(OPTIONS.ENABLE_WHITELIST);
 		const iconAttachment = interaction.options.getAttachment(OPTIONS.ICON);
 
 		if (
@@ -136,6 +143,7 @@ export const edit = {
 			!gamemode &&
 			!difficulty &&
 			!version &&
+			!enableWhitelist &&
 			!iconAttachment
 		) {
 			await interaction.editReply({
@@ -237,6 +245,7 @@ export const edit = {
 			if (gamemode) updatedServer.gamemode = gamemode;
 			if (difficulty) updatedServer.difficulty = difficulty;
 			if (version) updatedServer.version = version;
+			if (enableWhitelist !== null) updatedServer.enableWhitelist = enableWhitelist;
 
 			const containerInstance = docker.getContainer(container.Id);
 			await containerInstance.remove({ v: false });

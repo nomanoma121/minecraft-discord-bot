@@ -67,6 +67,7 @@ export const serverEnvBuilder = (server: Server): string[] => {
 		`TYPE=${server.type}`,
 		`GAMEMODE=${server.gamemode}`,
 		`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
+		`OVERRIDE_ICON=TRUE`,
 		`MOTD=${server.description}`,
 	];
 	return env;

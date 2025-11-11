@@ -15,8 +15,6 @@ import type { Whitelist } from "../types/server";
 import { getServerByName } from "../utils";
 
 const SUBCOMMANDS = {
-	ENABLE: "enable",
-	DISABLE: "disable",
 	LIST: "list",
 	ADD: "add",
 	REMOVE: "remove",
@@ -28,28 +26,6 @@ export const whitelist = {
 	data: new SlashCommandBuilder()
 		.setName("whitelist")
 		.setDescription("Enable or disable the server whitelist")
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(SUBCOMMANDS.ENABLE)
-				.setDescription("Enable the server whitelist")
-				.addStringOption((option) =>
-					option
-						.setName("server-name")
-						.setDescription("The name of the server")
-						.setRequired(true),
-				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(SUBCOMMANDS.DISABLE)
-				.setDescription("Disable the server whitelist")
-				.addStringOption((option) =>
-					option
-						.setName("server-name")
-						.setDescription("The name of the server")
-						.setRequired(true),
-				),
-		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(SUBCOMMANDS.LIST)
@@ -139,20 +115,6 @@ export const whitelist = {
 			}
 
 			switch (subcommand) {
-				case SUBCOMMANDS.ENABLE: {
-					await execCommands(container, ["rcon-cli", "whitelist", "on"]);
-					await interaction.editReply({
-						embeds: [createSuccessEmbed("Whitelist has been enabled.")],
-					});
-					break;
-				}
-				case SUBCOMMANDS.DISABLE: {
-					await execCommands(container, ["rcon-cli", "whitelist", "off"]);
-					await interaction.editReply({
-						embeds: [createSuccessEmbed("Whitelist has been disabled.")],
-					});
-					break;
-				}
 				case SUBCOMMANDS.LIST: {
 					const output = await execCommands(container, [
 						"cat",

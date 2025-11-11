@@ -26,3 +26,10 @@ export type Server = {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+export type Whitelist = {
+	uuid: string;
+	name: string;
+	level: number;
+	bypassesPlayerLimit: boolean;
+};

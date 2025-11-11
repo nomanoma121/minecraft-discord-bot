@@ -1,7 +1,13 @@
 import {
 	type ChatInputCommandInteraction,
+	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
+import { EMBED_COLORS } from "../constants";
+import { docker, execCommands } from "../lib/docker";
+import { createErrorEmbed, createInfoEmbed } from "../lib/embed";
+import type { Whitelist } from "../types/server";
+import { getServerByName } from "../utils";
 
 const SUBCOMMANDS = {
 	LIST: "list",
@@ -67,27 +73,98 @@ export const ops = {
 		await interaction.deferReply();
 		const subcommand = interaction.options.getSubcommand();
 
+		const serverName = interaction.options.getString("server-name");
+		if (!serverName) {
+			await interaction.editReply({
+				embeds: [createInfoEmbed("Server name is required.")],
+			});
+			return;
+		}
+
+		const server = await getServerByName(serverName);
+		if (!server) {
+			await interaction.editReply({
+				embeds: [createInfoEmbed(`Server "${serverName}" not found.`)],
+			});
+			return;
+		}
+
+		const userId = interaction.options.getString("user-id");
+
+		const container = docker.getContainer(server.id);
+		const containerInfo = await container.inspect();
+		if (!containerInfo.State.Running) {
+			await interaction.editReply({
+				embeds: [
+					createInfoEmbed(`
+          Server "${serverName}" is not running.`),
+				],
+			});
+			return;
+		}
 
 		switch (subcommand) {
 			case SUBCOMMANDS.LIST: {
-				// Implementation for listing operators
-				await interaction.reply("Listing all operators...");
+				const { output, errorOutput } = await execCommands(container, [
+					"cat",
+					"/data/ops.json",
+				]);
+				const ops = JSON.parse(output) as Whitelist[];
+
+				const embed = new EmbedBuilder()
+					.setTitle(`Operators for ${serverName}`)
+					.setColor(EMBED_COLORS.INFO)
+					.setDescription("No operators found.");
+
+				if (ops.length > 0) {
+					embed.setDescription(
+						ops.map((op) => `- ${op.name} (Level: ${op.level})`).join("\n"),
+					);
+				}
+
+				await interaction.editReply({ embeds: [embed] });
 				break;
 			}
 			case SUBCOMMANDS.ADD: {
-				const userId = interaction.options.getString("user-id", true);
-				// Implementation for adding an operator
-				await interaction.reply(`Adding operator: ${userId}`);
+				if (!userId) {
+					await interaction.editReply({
+						embeds: [
+							createErrorEmbed("User ID is required to add an operator."),
+						],
+					});
+					return;
+				}
+
+				const { output, errorOutput } = await execCommands(container, [
+					"rcon-cli",
+					"op",
+					userId,
+				]);
+
+				await interaction.editReply(`${output}, ${errorOutput}`);
 				break;
 			}
 			case SUBCOMMANDS.REMOVE: {
-				const userId = interaction.options.getString("user-id", true);
-				// Implementation for removing an operator
-				await interaction.reply(`Removing operator: ${userId}`);
+				if (!userId) {
+					await interaction.editReply({
+						embeds: [
+							createErrorEmbed("User ID is required to remove an operator."),
+						],
+					});
+					return;
+				}
+
+				const { output, errorOutput } = await execCommands(container, [
+					"rcon-cli",
+					"deop",
+					userId,
+				]);
+
+				await interaction.editReply(`${output}, ${errorOutput}`);
 				break;
 			}
 			default:
-				await interaction.reply("Unknown subcommand.");
+				await interaction.editReply("Unknown subcommand.");
 		}
 	},
 };

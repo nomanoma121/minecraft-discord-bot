@@ -1,5 +1,6 @@
 import type { ContainerInfo } from "dockerode";
 import Docker from "dockerode";
+import { PassThrough } from "stream";
 import { SERVER_DEFAULT_ICON_URL } from "../constants";
 import type { Difficulty, Gamemode, Server, ServerType } from "../types/server";
 
@@ -114,4 +115,48 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 	}
 
 	return server;
+};
+
+export const execCommands = async (
+	container: Docker.Container,
+	cmds: string[],
+): Promise<{ output: string; errorOutput: string }> => {
+	const exec = await container.exec({
+		Cmd: cmds,
+		AttachStdout: true,
+		AttachStderr: true,
+	});
+
+	const stream = await exec.start({ Detach: false });
+	const stdout = new PassThrough();
+	const stderr = new PassThrough();
+
+	let output = "";
+	let errorOutput = "";
+
+	// Set up data listeners before demuxing
+	stdout.on("data", (chunk) => {
+		output += chunk.toString();
+	});
+
+	stderr.on("data", (chunk) => {
+		errorOutput += chunk.toString();
+	});
+
+	// Demux the stream
+	container.modem.demuxStream(stream, stdout, stderr);
+
+	// Wait for stream to end
+	await new Promise<void>((resolve, reject) => {
+		stream.on("end", () => {
+			stdout.end();
+			stderr.end();
+			resolve();
+		});
+		stream.on("error", (err) => {
+			reject(err);
+		});
+	});
+
+	return { output, errorOutput };
 };

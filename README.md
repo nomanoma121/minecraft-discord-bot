@@ -2,6 +2,8 @@
 
 A Discord bot for managing Minecraft servers directly from Discord.
 
+**Note**: This bot is designed for managing individual servers that run one at a time. You can create multiple server configurations and easily switch between them, but only one server can be running simultaneously. This design ensures optimal resource usage and simplicity. Concurrent server execution is planned for future implementation.
+
 ## Features
 
 - 🎮 Create, edit, and delete Minecraft servers

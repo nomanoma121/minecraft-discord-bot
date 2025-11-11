@@ -50,17 +50,17 @@ export const whitelist = {
 						.setRequired(true),
 				),
 		)
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName(SUBCOMMANDS.LIST)
-        .setDescription("List all players on the whitelist")
-        .addStringOption((option) =>
-          option
-            .setName("server-name")
-            .setDescription("The name of the server")
-            .setRequired(true),
-        ),
-    )
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName(SUBCOMMANDS.LIST)
+				.setDescription("List all players on the whitelist")
+				.addStringOption((option) =>
+					option
+						.setName("server-name")
+						.setDescription("The name of the server")
+						.setRequired(true),
+				),
+		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(SUBCOMMANDS.ADD)
@@ -184,7 +184,12 @@ export const whitelist = {
 						});
 						return;
 					}
-					await execCommands(container, ["rcon-cli", "whitelist", "add", username]);
+					await execCommands(container, [
+						"rcon-cli",
+						"whitelist",
+						"add",
+						username,
+					]);
 					await interaction.editReply({
 						embeds: [
 							createSuccessEmbed(`Added **${username}** to the whitelist.`),
@@ -199,7 +204,12 @@ export const whitelist = {
 						});
 						return;
 					}
-					await execCommands(container, ["rcon-cli", "whitelist", "remove", username]);
+					await execCommands(container, [
+						"rcon-cli",
+						"whitelist",
+						"remove",
+						username,
+					]);
 					await interaction.editReply({
 						embeds: [
 							createSuccessEmbed(`Removed **${username}** from the whitelist.`),

@@ -11,6 +11,7 @@ import {
 	DIFFICULTY,
 	GAMEMODE,
 	ICONS_VOLUME_NAME,
+	LEVEL,
 	OPTIONS,
 } from "../constants";
 import {
@@ -26,7 +27,7 @@ import {
 	createServerInfoEmbed,
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
-import type { Difficulty, Gamemode, Server } from "../types/server";
+import type { Difficulty, Gamemode, Server, Level } from "../types/server";
 import { getAllServers, getIconImage, saveIconImage } from "../utils";
 
 export const edit = {
@@ -91,6 +92,31 @@ export const edit = {
 				.setDescription("Enable the server whitelist")
 				.setRequired(false),
 		)
+		.addBooleanOption((option) =>
+			option
+				.setName(OPTIONS.HARDCORE)
+				.setDescription("Enable hardcore mode")
+				.setRequired(false),
+		)
+		.addBooleanOption((option) =>
+			option
+				.setName(OPTIONS.PVP)
+				.setDescription("Enable player versus player combat")
+				.setRequired(false),
+		)
+		.addStringOption((option) =>
+			option
+				.setName(OPTIONS.LEVEL)
+				.setDescription("World generation type")
+				.setChoices(
+					{ name: "normal", value: LEVEL.NORMAL },
+					{ name: "flat", value: LEVEL.FLAT },
+					{ name: "large_biomes", value: LEVEL.LARGE_BIOMES },
+					{ name: "amplified", value: LEVEL.AMPLIFIED },
+					{ name: "single_biome_surface", value: LEVEL.SINGLE_BIOME_SURFACE },
+				)
+				.setRequired(false),
+		)
 		.addAttachmentOption((option) =>
 			option
 				.setName(OPTIONS.ICON)
@@ -133,8 +159,15 @@ export const edit = {
 		const difficulty = interaction.options.getString(
 			OPTIONS.DIFFICULTY,
 		) as Difficulty | null;
+		const level = interaction.options.getString(
+			OPTIONS.LEVEL,
+		) as Level | null;
+		const pvp = interaction.options.getBoolean(OPTIONS.PVP);
+		const hardcore = interaction.options.getBoolean(OPTIONS.HARDCORE);
 		const version = interaction.options.getString(OPTIONS.VERSION);
-		const enableWhitelist = interaction.options.getBoolean(OPTIONS.ENABLE_WHITELIST);
+		const enableWhitelist = interaction.options.getBoolean(
+			OPTIONS.ENABLE_WHITELIST,
+		);
 		const iconAttachment = interaction.options.getAttachment(OPTIONS.ICON);
 
 		if (
@@ -144,7 +177,10 @@ export const edit = {
 			!difficulty &&
 			!version &&
 			!enableWhitelist &&
-			!iconAttachment
+			!level &&
+			!iconAttachment &&
+			!pvp === null &&
+			!hardcore === null
 		) {
 			await interaction.editReply({
 				embeds: [
@@ -245,7 +281,11 @@ export const edit = {
 			if (gamemode) updatedServer.gamemode = gamemode;
 			if (difficulty) updatedServer.difficulty = difficulty;
 			if (version) updatedServer.version = version;
-			if (enableWhitelist !== null) updatedServer.enableWhitelist = enableWhitelist;
+			if (level) updatedServer.level = level;
+			if (enableWhitelist !== null)
+				updatedServer.enableWhitelist = enableWhitelist;
+			if (pvp !== null) updatedServer.pvp = pvp;
+			if (hardcore !== null) updatedServer.hardcore = hardcore;
 
 			const containerInstance = docker.getContainer(container.Id);
 			await containerInstance.remove({ v: false });

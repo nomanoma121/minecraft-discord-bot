@@ -2,7 +2,13 @@ import type { ContainerInfo } from "dockerode";
 import Docker from "dockerode";
 import { PassThrough } from "stream";
 import { SERVER_DEFAULT_ICON_URL } from "../constants";
-import type { Difficulty, Gamemode, Server, ServerType } from "../types/server";
+import type {
+	Difficulty,
+	Gamemode,
+	Level,
+	Server,
+	ServerType,
+} from "../types/server";
 
 const DOCKER_LABEL_PREFIX = "mc-bot";
 
@@ -32,6 +38,9 @@ export const filterLabelBuilder = (opts: Labels): string[] => {
 			case "managed":
 			case "iconPath":
 			case "enableWhitelist":
+			case "pvp":
+			case "hardcore":
+			case "level":
 			case "createdAt":
 			case "updatedAt":
 				labels.push(
@@ -71,6 +80,9 @@ export const serverEnvBuilder = (server: Server): string[] => {
 		`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
 		`MOTD=${server.description}`,
 		`ENABLE_WHITELIST=${server.enableWhitelist}`,
+		`PVP=${server.pvp}`,
+		`HARDCORE=${server.hardcore}`,
+		`LEVEL=${server.level}`,
 		`OVERRIDE_ICON=TRUE`,
 		`OVERRIDE_WHITELIST=true`,
 		`OVERRIDE_OPS=true`,
@@ -99,8 +111,11 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 		difficulty: getValue("difficulty") as Difficulty,
 		type: getValue("type") as ServerType,
 		gamemode: getValue("gamemode") as Gamemode,
+		level: getValue("level") as Level,
 		description: getValue("description"),
 		enableWhitelist: getValue("enableWhitelist") === "true",
+		pvp: getValue("pvp") === "true",
+		hardcore: getValue("hardcore") === "true",
 		createdAt: new Date(getValue("createdAt")),
 		updatedAt: new Date(getValue("updatedAt")),
 	};

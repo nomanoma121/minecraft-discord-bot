@@ -10,6 +10,7 @@ import {
 	DIFFICULTY,
 	GAMEMODE,
 	ICONS_VOLUME_NAME,
+	LEVEL,
 	MINECRAFT_SERVER_IMAGE,
 	OPTIONS,
 	SERVER_TYPE,
@@ -27,7 +28,13 @@ import {
 	createServerInfoEmbed,
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
-import type { Difficulty, Gamemode, Server, ServerType } from "../types/server";
+import type {
+	Difficulty,
+	Gamemode,
+	Level,
+	Server,
+	ServerType,
+} from "../types/server";
 import { saveIconImage } from "../utils";
 
 export const create = {
@@ -104,6 +111,31 @@ export const create = {
 				.setDescription("Enable the server whitelist (default: false)")
 				.setRequired(false),
 		)
+		.addBooleanOption((option) =>
+			option
+				.setName(OPTIONS.HARDCORE)
+				.setDescription("Enable hardcore mode (default: false)")
+				.setRequired(false),
+		)
+		.addBooleanOption((option) =>
+			option
+				.setName(OPTIONS.PVP)
+				.setDescription("Enable player versus player combat (default: true)")
+				.setRequired(false),
+		)
+		.addStringOption((option) =>
+			option
+				.setName(OPTIONS.LEVEL)
+				.setDescription("World type (default: normal)")
+				.setChoices(
+					{ name: "normal", value: LEVEL.NORMAL },
+					{ name: "flat", value: LEVEL.FLAT },
+					{ name: "large_biomes", value: LEVEL.LARGE_BIOMES },
+					{ name: "amplified", value: LEVEL.AMPLIFIED },
+					{ name: "single_biome_surface", value: LEVEL.SINGLE_BIOME_SURFACE },
+				)
+				.setRequired(false),
+		)
 		.addAttachmentOption((option) =>
 			option
 				.setName(OPTIONS.ICON)
@@ -157,7 +189,12 @@ export const create = {
 			description:
 				interaction.options.getString(OPTIONS.DESCRIPTION) ||
 				"A Minecraft server",
-			enableWhitelist: interaction.options.getBoolean(OPTIONS.ENABLE_WHITELIST) || false,
+			pvp: interaction.options.getBoolean(OPTIONS.PVP) || true,
+			hardcore: interaction.options.getBoolean(OPTIONS.HARDCORE) || false,
+			level:
+				(interaction.options.getString(OPTIONS.LEVEL) as Level) || LEVEL.NORMAL,
+			enableWhitelist:
+				interaction.options.getBoolean(OPTIONS.ENABLE_WHITELIST) || false,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};

@@ -27,7 +27,7 @@ import {
 	createServerInfoEmbed,
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
-import type { Difficulty, Gamemode, Server, Level } from "../types/server";
+import type { Difficulty, Gamemode, Level, Server } from "../types/server";
 import { getAllServers, getIconImage, saveIconImage } from "../utils";
 
 export const edit = {
@@ -159,9 +159,7 @@ export const edit = {
 		const difficulty = interaction.options.getString(
 			OPTIONS.DIFFICULTY,
 		) as Difficulty | null;
-		const level = interaction.options.getString(
-			OPTIONS.LEVEL,
-		) as Level | null;
+		const level = interaction.options.getString(OPTIONS.LEVEL) as Level | null;
 		const pvp = interaction.options.getBoolean(OPTIONS.PVP);
 		const hardcore = interaction.options.getBoolean(OPTIONS.HARDCORE);
 		const version = interaction.options.getString(OPTIONS.VERSION);

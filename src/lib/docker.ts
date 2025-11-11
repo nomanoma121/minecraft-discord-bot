@@ -1,6 +1,6 @@
+import { PassThrough } from "node:stream";
 import type { ContainerInfo } from "dockerode";
 import Docker from "dockerode";
-import { PassThrough } from "stream";
 import { SERVER_DEFAULT_ICON_URL } from "../constants";
 import type {
 	Difficulty,

@@ -85,7 +85,11 @@ export const create = {
 			option
 				.setName(OPTIONS.SERVER_TYPE)
 				.setDescription("Type of Minecraft server (default: paper)")
-				.setChoices({ name: "paper", value: SERVER_TYPE.PAPER })
+				.setChoices(
+					{ name: "paper", value: SERVER_TYPE.PAPER },
+					{ name: "vanilla", value: SERVER_TYPE.VANILLA },
+					{ name: "forge", value: SERVER_TYPE.FORGE },
+				)
 				.setRequired(false),
 		)
 		.addIntegerOption((option) =>

@@ -21,6 +21,8 @@ export type Server = {
 	type: ServerType;
 	gamemode: Gamemode;
 	description: string;
+	whitelistedUserIds?: string[];
+	opsUserIds?: string[];
 	createdAt: Date;
 	updatedAt: Date;
 };

@@ -221,6 +221,13 @@ export const edit = {
 					server.id,
 					resizedImageBuffer,
 				);
+			} else {
+				const buffer = await getIconImage(server.id);
+				if (buffer) {
+				serverIconAttachment = new AttachmentBuilder(buffer, {
+					name: `${server.id}.png`,
+				});
+			}
 			}
 
 			await interaction.editReply("⌛ Updating the server...");
@@ -256,13 +263,6 @@ export const edit = {
 					[`${Config.port}/tcp`]: {},
 				},
 			});
-
-			const buffer = await getIconImage(server.id);
-			if (buffer) {
-				serverIconAttachment = new AttachmentBuilder(buffer, {
-					name: `${server.id}.png`,
-				});
-			}
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Updated Successfully!`,

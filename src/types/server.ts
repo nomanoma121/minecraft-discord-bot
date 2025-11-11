@@ -27,9 +27,14 @@ export type Server = {
 	updatedAt: Date;
 };
 
-export type Whitelist = {
+export type Operator = {
 	uuid: string;
 	name: string;
 	level: number;
 	bypassesPlayerLimit: boolean;
+};
+
+export type Whitelist = {
+	uuid: string;
+	name: string;
 };

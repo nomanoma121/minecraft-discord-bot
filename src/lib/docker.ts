@@ -120,7 +120,7 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 export const execCommands = async (
 	container: Docker.Container,
 	cmds: string[],
-): Promise<{ output: string; errorOutput: string }> => {
+): Promise<string> => {
 	const exec = await container.exec({
 		Cmd: cmds,
 		AttachStdout: true,
@@ -134,7 +134,6 @@ export const execCommands = async (
 	let output = "";
 	let errorOutput = "";
 
-	// Set up data listeners before demuxing
 	stdout.on("data", (chunk) => {
 		output += chunk.toString();
 	});
@@ -143,10 +142,8 @@ export const execCommands = async (
 		errorOutput += chunk.toString();
 	});
 
-	// Demux the stream
 	container.modem.demuxStream(stream, stdout, stderr);
 
-	// Wait for stream to end
 	await new Promise<void>((resolve, reject) => {
 		stream.on("end", () => {
 			stdout.end();
@@ -158,5 +155,9 @@ export const execCommands = async (
 		});
 	});
 
-	return { output, errorOutput };
+	if (errorOutput) {
+		throw new Error(errorOutput);
+	}
+
+	return output;
 };

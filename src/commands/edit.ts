@@ -27,7 +27,7 @@ import {
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Difficulty, Gamemode, Server } from "../types/server";
-import { getAllServers, saveIconImage } from "../utils";
+import { getAllServers, saveIconImage, getIconImage } from "../utils";
 
 export const edit = {
 	name: "edit",
@@ -256,6 +256,13 @@ export const edit = {
 					[`${Config.port}/tcp`]: {},
 				},
 			});
+
+			const buffer = await getIconImage(server.id);
+			if (buffer) {
+				serverIconAttachment = new AttachmentBuilder(buffer, {
+					name: `${server.id}.png`,
+				});
+			}
 
 			await interaction.editReply({
 				content: `✅ Server **${serverName}** Updated Successfully!`,

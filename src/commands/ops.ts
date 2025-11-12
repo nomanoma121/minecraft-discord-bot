@@ -11,6 +11,7 @@ import {
 	createInfoEmbed,
 	createSuccessEmbed,
 } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import type { Operator } from "../types/server";
 import { getAllServers, getServerByName } from "../utils";
 
@@ -44,7 +45,7 @@ export const ops = {
 				.setDescription("Add an operator to the server")
 				.addStringOption((option) =>
 					option
-						.setName("server-name")
+						.setName(OPTIONS.SERVER_NAME)
 						.setDescription("The name of the server")
 						.setAutocomplete(true)
 						.setRequired(true),
@@ -62,7 +63,7 @@ export const ops = {
 				.setDescription("Remove an operator from the server")
 				.addStringOption((option) =>
 					option
-						.setName("server-name")
+						.setName(OPTIONS.SERVER_NAME)
 						.setDescription("The name of the server")
 						.setAutocomplete(true)
 						.setRequired(true),
@@ -114,6 +115,8 @@ export const ops = {
 		}
 
 		const username = interaction.options.getString("username");
+
+		const release = await mutex.acquire();
 
 		try {
 			const container = docker.getContainer(server.id);
@@ -210,6 +213,8 @@ export const ops = {
 					),
 				],
 			});
+		} finally {
+			release();
 		}
 	},
 };

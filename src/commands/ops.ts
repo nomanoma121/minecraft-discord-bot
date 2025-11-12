@@ -106,6 +106,8 @@ export const ops = {
 			return;
 		}
 
+		const release = await mutex.acquire();
+
 		const server = await getServerByName(serverName);
 		if (!server) {
 			await interaction.editReply({
@@ -115,8 +117,6 @@ export const ops = {
 		}
 
 		const username = interaction.options.getString("username");
-
-		const release = await mutex.acquire();
 
 		try {
 			const container = docker.getContainer(server.id);

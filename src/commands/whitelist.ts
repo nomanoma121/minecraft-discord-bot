@@ -1,9 +1,10 @@
 import {
+	AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import { EMBED_COLORS } from "../constants";
+import { AUTOCOMPLETE_MAX_CHOICES, EMBED_COLORS, OPTIONS } from "../constants";
 import { docker, execCommands } from "../lib/docker";
 import {
 	createErrorEmbed,
@@ -12,7 +13,7 @@ import {
 } from "../lib/embed";
 import { mutex } from "../lib/mutex";
 import type { Whitelist } from "../types/server";
-import { getServerByName } from "../utils";
+import { getAllServers, getServerByName } from "../utils";
 
 const SUBCOMMANDS = {
 	LIST: "list",
@@ -32,8 +33,9 @@ export const whitelist = {
 				.setDescription("List all players on the whitelist")
 				.addStringOption((option) =>
 					option
-						.setName("server-name")
+						.setName(OPTIONS.SERVER_NAME)
 						.setDescription("The name of the server")
+						.setAutocomplete(true)
 						.setRequired(true),
 				),
 		)
@@ -43,8 +45,9 @@ export const whitelist = {
 				.setDescription("Add a player to the whitelist")
 				.addStringOption((option) =>
 					option
-						.setName("server-name")
+						.setName(OPTIONS.SERVER_NAME)
 						.setDescription("The name of the server")
+						.setAutocomplete(true)
 						.setRequired(true),
 				)
 				.addStringOption((option) =>
@@ -60,8 +63,9 @@ export const whitelist = {
 				.setDescription("Remove a player from the whitelist")
 				.addStringOption((option) =>
 					option
-						.setName("server-name")
+						.setName(OPTIONS.SERVER_NAME)
 						.setDescription("The name of the server")
+						.setAutocomplete(true)
 						.setRequired(true),
 				)
 				.addStringOption((option) =>
@@ -72,11 +76,27 @@ export const whitelist = {
 				),
 		),
 
+	async autocomplete(interaction: AutocompleteInteraction) {
+		const focusedOption = interaction.options.getFocused(true);
+		if (focusedOption.name === OPTIONS.SERVER_NAME) {
+			const servers = await getAllServers();
+			const filtered = servers.filter((server) =>
+				server.name.toLowerCase().startsWith(focusedOption.value.toLowerCase()),
+			);
+			await interaction.respond(
+				filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
+					name: server.name,
+					value: server.name,
+				})),
+			);
+		}
+	},
+
 	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
 
 		const subcommand = interaction.options.getSubcommand();
-		const serverName = interaction.options.getString("server-name");
+		const serverName = interaction.options.getString(OPTIONS.SERVER_NAME);
 		if (!serverName) {
 			await interaction.editReply({
 				embeds: [createInfoEmbed("Server name is required.")],

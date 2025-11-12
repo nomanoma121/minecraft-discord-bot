@@ -23,10 +23,10 @@ const SUBCOMMANDS = {
 
 export const whitelist = {
 	name: "whitelist",
-	description: "Enable or disable the server whitelist",
+	description: "Manage the server whitelist (list/add/remove players)",
 	data: new SlashCommandBuilder()
 		.setName("whitelist")
-		.setDescription("Enable or disable the server whitelist")
+		.setDescription("Manage the server whitelist (list/add/remove players)")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(SUBCOMMANDS.LIST)

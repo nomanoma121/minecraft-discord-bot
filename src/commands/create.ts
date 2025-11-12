@@ -189,12 +189,12 @@ export const create = {
 			description:
 				interaction.options.getString(OPTIONS.DESCRIPTION) ||
 				"A Minecraft server",
-			pvp: interaction.options.getBoolean(OPTIONS.PVP) || true,
-			hardcore: interaction.options.getBoolean(OPTIONS.HARDCORE) || false,
+			pvp: interaction.options.getBoolean(OPTIONS.PVP) ?? true,
+			hardcore: interaction.options.getBoolean(OPTIONS.HARDCORE) ?? false,
 			level:
 				(interaction.options.getString(OPTIONS.LEVEL) as Level) || LEVEL.NORMAL,
 			enableWhitelist:
-				interaction.options.getBoolean(OPTIONS.ENABLE_WHITELIST) || false,
+				interaction.options.getBoolean(OPTIONS.ENABLE_WHITELIST) ?? false,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};

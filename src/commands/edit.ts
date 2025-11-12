@@ -174,11 +174,11 @@ export const edit = {
 			!gamemode &&
 			!difficulty &&
 			!version &&
-			!enableWhitelist &&
 			!level &&
 			!iconAttachment &&
-			!pvp === null &&
-			!hardcore === null
+			pvp === null &&
+			hardcore === null &&
+			enableWhitelist === null
 		) {
 			await interaction.editReply({
 				embeds: [

@@ -83,7 +83,7 @@ export const serverEnvBuilder = (server: Server): string[] => {
 		`PVP=${server.pvp}`,
 		`HARDCORE=${server.hardcore}`,
 		`LEVEL=${server.level}`,
-		`OVERRIDE_ICON=TRUE`,
+		`OVERRIDE_ICON=true`,
 		`OVERRIDE_WHITELIST=true`,
 		`OVERRIDE_OPS=true`,
 	];

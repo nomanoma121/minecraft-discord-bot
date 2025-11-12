@@ -1,5 +1,5 @@
 import {
-	AutocompleteInteraction,
+	type AutocompleteInteraction,
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 	SlashCommandBuilder,

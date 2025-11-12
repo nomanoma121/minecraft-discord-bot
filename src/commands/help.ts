@@ -64,14 +64,12 @@ export const help = {
 				},
 				{
 					name: "/whitelist",
-					value:
-						"Manage server whitelist (list/add/remove players)",
+					value: "Manage server whitelist (list/add/remove players)",
 					inline: false,
 				},
 				{
 					name: "/ops",
-					value:
-						"Manage server operators (list/add/remove operators)",
+					value: "Manage server operators (list/add/remove operators)",
 					inline: false,
 				},
 				{
@@ -92,8 +90,7 @@ export const help = {
 				},
 				{
 					name: "/backup-delete",
-					value:
-						"Deletes a backup for a specific server (owner only)",
+					value: "Deletes a backup for a specific server (owner only)",
 					inline: false,
 				},
 				{

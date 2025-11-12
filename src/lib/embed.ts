@@ -39,12 +39,20 @@ export const createServerInfoEmbed = (
 			{ name: "Server Type", value: server.type, inline: true },
 			{ name: "Gamemode", value: server.gamemode, inline: true },
 			{ name: "Difficulty", value: server.difficulty, inline: true },
-			{ name: "Whitelist Enabled", value: String(server.enableWhitelist), inline: true },
+			{
+				name: "Whitelist Enabled",
+				value: String(server.enableWhitelist),
+				inline: true,
+			},
 			{ name: "World Level", value: server.level, inline: true },
 			{ name: "PVP", value: String(server.pvp), inline: true },
 			{ name: "Hardcore", value: String(server.hardcore), inline: true },
 			{ name: "Max Players", value: server.maxPlayers, inline: true },
-			{ name: "Created At", value: formatDateForDisplay(server.createdAt), inline: true },
+			{
+				name: "Created At",
+				value: formatDateForDisplay(server.createdAt),
+				inline: true,
+			},
 		)
 		.setFooter({ text: `Server ID: ${server.id}` });
 

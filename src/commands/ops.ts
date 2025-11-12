@@ -11,6 +11,7 @@ import {
 	createInfoEmbed,
 	createSuccessEmbed,
 } from "../lib/embed";
+import { mutex } from "../lib/mutex";
 import type { Operator } from "../types/server";
 import { getAllServers, getServerByName } from "../utils";
 
@@ -44,7 +45,7 @@ export const ops = {
 				.setDescription("Add an operator to the server")
 				.addStringOption((option) =>
 					option
-						.setName("server-name")
+						.setName(OPTIONS.SERVER_NAME)
 						.setDescription("The name of the server")
 						.setAutocomplete(true)
 						.setRequired(true),
@@ -62,7 +63,7 @@ export const ops = {
 				.setDescription("Remove an operator from the server")
 				.addStringOption((option) =>
 					option
-						.setName("server-name")
+						.setName(OPTIONS.SERVER_NAME)
 						.setDescription("The name of the server")
 						.setAutocomplete(true)
 						.setRequired(true),
@@ -104,6 +105,8 @@ export const ops = {
 			});
 			return;
 		}
+
+		const release = await mutex.acquire();
 
 		const server = await getServerByName(serverName);
 		if (!server) {
@@ -210,6 +213,8 @@ export const ops = {
 					),
 				],
 			});
+		} finally {
+			release();
 		}
 	},
 };

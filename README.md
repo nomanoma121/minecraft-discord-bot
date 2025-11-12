@@ -35,10 +35,10 @@ cp .env.example .env
 # Edit .env with your Discord tokens
 
 # Build and start
-docker-compose up -d --build
+docker compose up -d --build
 
 # View logs
-docker-compose logs -f bot
+docker compose logs -f bot
 ```
 
 ### Environment Variables
@@ -60,6 +60,8 @@ GUILD_ID=your_guild_id
 | `/list` | List all servers |
 | `/edit` | Edit server configuration (owner only) |
 | `/delete` | Delete a server (owner only) |
+| `/whitelist` | Manage server whitelist (list/add/remove players) |
+| `/ops` | Manage server operators (list/add/remove operators) |
 | `/backup-create` | Create a backup of server data |
 | `/backup-list` | List all backups for a server |
 | `/backup-restore` | Restore a server from backup |
@@ -183,6 +185,54 @@ Permanently deletes a server and all its data including backups. The server must
 ```
 
 **Warning:** This action cannot be undone!
+
+---
+
+### `/whitelist` - Manage server whitelist
+
+Manage the whitelist for a running server. Supports listing, adding, and removing players.
+
+**Subcommands:**
+- `list` - Display all players on the whitelist
+- `add` - Add a player to the whitelist
+- `remove` - Remove a player from the whitelist
+
+**Options:**
+- `server-name` (required) - Name of the server
+- `username` (required for add/remove) - Minecraft username
+
+**Examples:**
+```
+/whitelist list server-name:MyServer
+/whitelist add server-name:MyServer username:Steve
+/whitelist remove server-name:MyServer username:Alex
+```
+
+The server must be running to manage the whitelist.
+
+---
+
+### `/ops` - Manage server operators
+
+Manage operators (admins) for a running server. Supports listing, adding, and removing operators.
+
+**Subcommands:**
+- `list` - Display all operators and their permission levels
+- `add` - Grant operator privileges to a player
+- `remove` - Revoke operator privileges from a player
+
+**Options:**
+- `server-name` (required) - Name of the server
+- `username` (required for add/remove) - Minecraft username
+
+**Examples:**
+```
+/ops list server-name:MyServer
+/ops add server-name:MyServer username:Steve
+/ops remove server-name:MyServer username:Alex
+```
+
+The server must be running to manage operators.
 
 ---
 

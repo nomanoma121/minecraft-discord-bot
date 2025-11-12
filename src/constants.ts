@@ -18,6 +18,14 @@ export const SERVER_TYPE = {
 	FORGE: "FORGE",
 } as const;
 
+export const LEVEL = {
+	NORMAL: "normal",
+	FLAT: "flat",
+	LARGE_BIOMES: "large_biomes",
+	AMPLIFIED: "amplified",
+	SINGLE_BIOME_SURFACE: "single_biome_surface",
+} as const;
+
 export const HEALTH_STATUS = {
 	HEALTHY: "healthy",
 	UNHEALTHY: "unhealthy",
@@ -37,8 +45,14 @@ export const OPTIONS = {
 	DIFFICULTY: "difficulty",
 	VERSION: "version",
 	SERVER_TYPE: "server-type",
+	HARDCORE: "hardcore",
+	PVP: "pvp",
+	WHITELIST: "whitelist",
+	LEVEL: "level",
+	OPS: "ops",
 	ICON: "icon",
 	BACKUP: "backup",
+	ENABLE_WHITELIST: "enable-whitelist",
 } as const;
 
 export const DEFAULT_MAX_PLAYERS = 20;

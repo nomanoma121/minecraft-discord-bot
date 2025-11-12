@@ -1,7 +1,14 @@
+import { PassThrough } from "node:stream";
 import type { ContainerInfo } from "dockerode";
 import Docker from "dockerode";
 import { SERVER_DEFAULT_ICON_URL } from "../constants";
-import type { Difficulty, Gamemode, Server, ServerType } from "../types/server";
+import type {
+	Difficulty,
+	Gamemode,
+	Level,
+	Server,
+	ServerType,
+} from "../types/server";
 
 const DOCKER_LABEL_PREFIX = "mc-bot";
 
@@ -30,6 +37,10 @@ export const filterLabelBuilder = (opts: Labels): string[] => {
 			case "description":
 			case "managed":
 			case "iconPath":
+			case "enableWhitelist":
+			case "pvp":
+			case "hardcore":
+			case "level":
 			case "createdAt":
 			case "updatedAt":
 				labels.push(
@@ -65,10 +76,16 @@ export const serverEnvBuilder = (server: Server): string[] => {
 		`MAX_PLAYERS=${server.maxPlayers}`,
 		`DIFFICULTY=${server.difficulty}`,
 		`TYPE=${server.type}`,
-		`GAMEMODE=${server.gamemode}`,
+		`MODE=${server.gamemode}`,
 		`ICON=${server.iconPath || SERVER_DEFAULT_ICON_URL}`,
-		`OVERRIDE_ICON=TRUE`,
 		`MOTD=${server.description}`,
+		`ENABLE_WHITELIST=${server.enableWhitelist}`,
+		`PVP=${server.pvp}`,
+		`HARDCORE=${server.hardcore}`,
+		`LEVEL=${server.level}`,
+		`OVERRIDE_ICON=true`,
+		`OVERRIDE_WHITELIST=true`,
+		`OVERRIDE_OPS=true`,
 	];
 	return env;
 };
@@ -94,7 +111,11 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 		difficulty: getValue("difficulty") as Difficulty,
 		type: getValue("type") as ServerType,
 		gamemode: getValue("gamemode") as Gamemode,
+		level: getValue("level") as Level,
 		description: getValue("description"),
+		enableWhitelist: getValue("enableWhitelist") === "true",
+		pvp: getValue("pvp") === "true",
+		hardcore: getValue("hardcore") === "true",
 		createdAt: new Date(getValue("createdAt")),
 		updatedAt: new Date(getValue("updatedAt")),
 	};
@@ -104,4 +125,49 @@ export const parseLabels = (labels: ContainerLabels): Server => {
 	}
 
 	return server;
+};
+
+export const execCommands = async (
+	container: Docker.Container,
+	cmds: string[],
+): Promise<string> => {
+	const exec = await container.exec({
+		Cmd: cmds,
+		AttachStdout: true,
+		AttachStderr: true,
+	});
+
+	const stream = await exec.start({ Detach: false });
+	const stdout = new PassThrough();
+	const stderr = new PassThrough();
+
+	let output = "";
+	let errorOutput = "";
+
+	stdout.on("data", (chunk) => {
+		output += chunk.toString();
+	});
+
+	stderr.on("data", (chunk) => {
+		errorOutput += chunk.toString();
+	});
+
+	container.modem.demuxStream(stream, stdout, stderr);
+
+	await new Promise<void>((resolve, reject) => {
+		stream.on("end", () => {
+			stdout.end();
+			stderr.end();
+			resolve();
+		});
+		stream.on("error", (err) => {
+			reject(err);
+		});
+	});
+
+	if (errorOutput) {
+		throw new Error(errorOutput);
+	}
+
+	return output;
 };

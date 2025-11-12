@@ -63,6 +63,16 @@ export const help = {
 					inline: false,
 				},
 				{
+					name: "/whitelist",
+					value: "Manage server whitelist (list/add/remove players)",
+					inline: false,
+				},
+				{
+					name: "/ops",
+					value: "Manage server operators (list/add/remove operators)",
+					inline: false,
+				},
+				{
 					name: "/backup-create",
 					value: "Creates a backup of a Minecraft server's world data",
 					inline: false,
@@ -76,6 +86,11 @@ export const help = {
 					name: "/backup-restore",
 					value:
 						"Restores a server from a backup (owner only, server must be stopped)",
+					inline: false,
+				},
+				{
+					name: "/backup-delete",
+					value: "Deletes a backup for a specific server (owner only)",
 					inline: false,
 				},
 				{

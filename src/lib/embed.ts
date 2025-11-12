@@ -2,6 +2,7 @@ import type { AttachmentBuilder } from "discord.js";
 import { EmbedBuilder } from "discord.js";
 import { EMBED_COLORS, SERVER_DEFAULT_ICON_URL } from "../constants";
 import type { Server } from "../types/server";
+import { formatDateForDisplay } from "../utils";
 
 export const createErrorEmbed = (errorMessage: string) => {
 	return new EmbedBuilder()
@@ -33,13 +34,19 @@ export const createServerInfoEmbed = (
 		.setColor(EMBED_COLORS.INFO)
 		.setDescription(server.description)
 		.addFields(
+			{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
 			{ name: "Version", value: server.version, inline: true },
 			{ name: "Server Type", value: server.type, inline: true },
 			{ name: "Gamemode", value: server.gamemode, inline: true },
 			{ name: "Difficulty", value: server.difficulty, inline: true },
-			{ name: "Owner", value: `<@${server.ownerId}>`, inline: true },
+			{ name: "Whitelist Enabled", value: String(server.enableWhitelist), inline: true },
+			{ name: "World Level", value: server.level, inline: true },
+			{ name: "PVP", value: String(server.pvp), inline: true },
+			{ name: "Hardcore", value: String(server.hardcore), inline: true },
 			{ name: "Max Players", value: server.maxPlayers, inline: true },
-		);
+			{ name: "Created At", value: formatDateForDisplay(server.createdAt), inline: true },
+		)
+		.setFooter({ text: `Server ID: ${server.id}` });
 
 	if (options?.status) {
 		embed.addFields({ name: "Status", value: options.status, inline: true });

@@ -293,7 +293,6 @@ export const edit = {
 				Image: container.Image,
 				Labels: labelBuilder({
 					managed: true,
-					...server,
 					...updatedServer,
 				}),
 				Env: serverEnvBuilder(updatedServer),

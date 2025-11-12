@@ -34,6 +34,7 @@ export const ops = {
 					option
 						.setName("server-name")
 						.setDescription("The name of the server")
+						.setAutocomplete(true)
 						.setRequired(true),
 				),
 		)
@@ -45,6 +46,7 @@ export const ops = {
 					option
 						.setName("server-name")
 						.setDescription("The name of the server")
+						.setAutocomplete(true)
 						.setRequired(true),
 				)
 				.addStringOption((option) =>
@@ -80,7 +82,7 @@ export const ops = {
 		if (focusedOption.name === OPTIONS.SERVER_NAME) {
 			const servers = await getAllServers();
 			const filtered = servers.filter((server) =>
-				server.name.toLowerCase().includes(focusedOption.value.toLowerCase()),
+				server.name.toLowerCase().startsWith(focusedOption.value.toLowerCase()),
 			);
 			await interaction.respond(
 				filtered.slice(0, AUTOCOMPLETE_MAX_CHOICES).map((server) => ({
@@ -195,7 +197,9 @@ export const ops = {
 					break;
 				}
 				default:
-					await interaction.editReply("Unknown subcommand.");
+					await interaction.editReply({
+						embeds: [createErrorEmbed("Invalid subcommand.")],
+					});
 			}
 		} catch (error) {
 			console.error("Error executing ops command:", error);
